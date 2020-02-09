@@ -8,4 +8,4 @@ create table if not exists rare_rate (
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back
-drop table rare_rate
+drop table rare_rate;
