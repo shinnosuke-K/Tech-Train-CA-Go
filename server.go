@@ -28,7 +28,7 @@ func (router *Server) Init() error {
 }
 
 func (router *Server) Run(port string) {
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), router.Engine)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", port), router.Engine)
 	if err != nil {
 		log.Fatal(err)
 	}
