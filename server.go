@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/rs/xid"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -34,8 +36,12 @@ func (router *Server) Run(port string) {
 	}
 }
 
-// 使うid生成パッケージ github.com/rs/xid
+func createUserId() string {
+	return xid.New().String()
+}
+
 func main() {
+
 	server := NewServer()
 	if err := server.Init(); err != nil {
 		log.Fatal(err)
