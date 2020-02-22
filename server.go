@@ -8,8 +8,6 @@ import (
 
 	"github.com/rs/xid"
 
-	"github.com/google/uuid"
-
 	"github.com/jinzhu/gorm"
 )
 
@@ -38,32 +36,11 @@ func (router *Server) Run(port string) {
 	}
 }
 
-func tryUuidGoogle() {
-	userId := uuid.Must(uuid.NewRandom())
-	fmt.Printf("%s : %d\n", userId, len(userId.String()))
+func createUserId() string {
+	return xid.New().String()
 }
 
-func tryUuidXid() {
-	userId := xid.New()
-	fmt.Printf("%s : %d\n", userId.String(), len(userId.String()))
-}
-
-//func tryUuidAnarchar() {
-//	userId := shortuuid.New()
-//	fmt.Printf("%s : %d\n", userId, len(userId.String()))
-//}
-
-// 使うid生成パッケージ github.com/rs/xid
 func main() {
-
-	for i := 0; i < 5; i++ {
-		fmt.Println("Google/uuid")
-		tryUuidGoogle()
-		fmt.Println("xid/uuid")
-		tryUuidXid()
-		//fmt.Println("anarchar")
-		//tryUuidAnarchar()
-	}
 
 	server := NewServer()
 	if err := server.Init(); err != nil {
@@ -74,5 +51,5 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	//server.Run(port)
+	server.Run(port)
 }
