@@ -22,9 +22,25 @@ func NewServer() *Server {
 	}
 }
 
+func createUserHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func getUserHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func updateUserHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (router *Server) Init() error {
 	// db.open の処理
+
 	// http method ごとの処理(handler)
+	router.Engine.HandleFunc("/user/create", createUserHandler)
+	router.Engine.HandleFunc("/user/get", getUserHandler)
+	router.Engine.HandleFunc("/user/update", updateUserHandler)
 
 	return nil
 }
