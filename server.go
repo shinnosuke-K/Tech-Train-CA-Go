@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
-	"github.com/rs/xid"
+	"github.com/google/uuid"
 
 	"github.com/jinzhu/gorm"
 )
@@ -23,7 +25,19 @@ func NewServer() *Server {
 }
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		response := map[string]string{
+			"name": createUserId(),
+		}
+		resJson, err := json.Marshal(response)
+		if err != nil {
+			log.Fatal()
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(resJson)
+	} else {
 
+	}
 }
 
 func getUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +67,8 @@ func (router *Server) Run(port string) {
 }
 
 func createUserId() string {
-	return xid.New().String()
+	userId := uuid.Must(uuid.NewRandom())
+	return strings.ReplaceAll(userId.String(), "-", "")
 }
 
 func main() {
