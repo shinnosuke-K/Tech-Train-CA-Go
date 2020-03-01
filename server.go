@@ -3,10 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"github.com/google/uuid"
 
@@ -25,19 +29,64 @@ func NewServer() *Server {
 }
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		response := map[string]string{
-			"name": createUserId(),
-		}
-		resJson, err := json.Marshal(response)
-		if err != nil {
-			log.Fatal()
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(resJson)
-	} else {
 
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	var jsonBody map[string]string
+	err = json.Unmarshal(body, &jsonBody)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	createTimeUTC := time.Now().UTC()
+	//jst, _ := time.LoadLocation("Asia/Tokyo")
+	//createTimeJST := createTimeUTC.In(jst)
+	userId := createUserId()
+	name := jsonBody["name"]
+	if name == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":  userId,
+		"user": name,
+		"nbf":  createTimeUTC,
+		"iat":  createTimeUTC,
+	})
+
+	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	tokenString, err := token.SignedString(keyData)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	res, err := json.Marshal(map[string]string{
+		"token": tokenString,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(res)
+	return
 }
 
 func getUserHandler(w http.ResponseWriter, r *http.Request) {
