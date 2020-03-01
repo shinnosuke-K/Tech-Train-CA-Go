@@ -65,7 +65,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		"iat":  createTimeUTC,
 	})
 
-	keyData, err := ioutil.ReadFile("./rsa/jwtRS256.key")
+	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
