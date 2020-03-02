@@ -20,8 +20,11 @@ import (
 )
 
 type Server struct {
-	db     *gorm.DB
 	Engine *http.ServeMux
+}
+
+type Model struct {
+	db *gorm.DB
 }
 
 func NewServer() *Server {
@@ -30,7 +33,7 @@ func NewServer() *Server {
 	}
 }
 
-func createUserHandler(w http.ResponseWriter, r *http.Request) {
+func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusBadRequest)
@@ -50,21 +53,40 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createTimeUTC := time.Now().UTC()
-	//jst, _ := time.LoadLocation("Asia/Tokyo")
-	//createTimeJST := createTimeUTC.In(jst)
-	userId := createUserId()
+	var account db.User
+
 	name := jsonBody["name"]
 	if name == "" {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
+	account.UserName = name
+	account.UserId = createUserId()
+	go func(account *db.User) {
+		for {
+			if account.IsRecord(model.db) {
+				account.UserId = createUserId()
+			} else {
+				break
+			}
+		}
+	}(&account)
+
+	createTimeUTC := time.Now().UTC()
+	jst, _ := time.LoadLocation("Asia/Tokyo")
+	createTimeJST := createTimeUTC.In(jst)
+
+	account.RegTime = createTimeUTC
+	account.RegTimeJST = createTimeJST
+	account.UpdateTime = createTimeUTC
+	account.UpdateTimeJST = createTimeJST
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":  userId,
-		"user": name,
-		"nbf":  createTimeUTC,
-		"iat":  createTimeUTC,
+		"sub":  account.UserId,
+		"user": account.UserName,
+		"nbf":  account.RegTime,
+		"iat":  account.RegTime,
 	})
 
 	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
@@ -79,8 +101,16 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	account.Token = tokenString
+
+	if err = account.Insert(model.db); err != nil {
+		fmt.Println(1)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	res, err := json.Marshal(map[string]string{
-		"token": tokenString,
+		"token": account.Token,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -91,27 +121,27 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func getUserHandler(w http.ResponseWriter, r *http.Request) {
+func (model *Model) getUserHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func updateUserHandler(w http.ResponseWriter, r *http.Request) {
+func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
 func (router *Server) Init() error {
 	// db.open の処理
-	db, err := db.Open()
+	connectedDB, err := db.Open()
 	if err != nil {
 		return err
 	}
 
-	router.db = db
+	model := Model{db: connectedDB}
 
 	// http method ごとの処理(handler)
-	router.Engine.HandleFunc("/user/create", createUserHandler)
-	router.Engine.HandleFunc("/user/get", getUserHandler)
-	router.Engine.HandleFunc("/user/update", updateUserHandler)
+	router.Engine.HandleFunc("/user/create", model.createUserHandler)
+	router.Engine.HandleFunc("/user/get", model.getUserHandler)
+	router.Engine.HandleFunc("/user/update", model.updateUserHandler)
 
 	return nil
 }
