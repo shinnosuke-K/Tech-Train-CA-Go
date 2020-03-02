@@ -34,3 +34,7 @@ func (userInfo *User) IsRecord(DB *gorm.DB) bool {
 		return false
 	}
 }
+
+func (userInfo *User) Insert(DB *gorm.DB) error {
+	return DB.Create(&userInfo).Error
+}
