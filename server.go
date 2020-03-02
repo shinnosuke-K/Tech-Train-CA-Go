@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/db"
+
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/google/uuid"
@@ -99,6 +101,12 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func (router *Server) Init() error {
 	// db.open の処理
+	db, err := db.Open()
+	if err != nil {
+		return err
+	}
+
+	router.db = db
 
 	// http method ごとの処理(handler)
 	router.Engine.HandleFunc("/user/create", createUserHandler)
