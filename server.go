@@ -123,6 +123,32 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func (model *Model) getUserHandler(w http.ResponseWriter, r *http.Request) {
 
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tokenString := r.Header.Get("x-token")
+	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("%s", "Unexpected signing method")
+
+		} else {
+			keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
+			if err != nil {
+				return nil, err
+			}
+			return keyData, nil
+		}
+	})
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	token := parsedToken.Claims.(jwt.MapClaims)
+	fmt.Println(token)
 }
 
 func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
