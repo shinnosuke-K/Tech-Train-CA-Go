@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     user_name varchar(255),
     reg_time datetime,
     reg_time_jst datetime,
-    udate_time datetime,
+    update_time datetime,
     update_time_jst datetime
 );
 
