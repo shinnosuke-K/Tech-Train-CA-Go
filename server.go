@@ -63,6 +63,7 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	account.UserName = name
 	account.UserId = createUserId()
+	// 要検討
 	go func(account *db.User) {
 		for {
 			if account.IsRecord(model.db) {
