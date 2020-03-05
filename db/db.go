@@ -38,3 +38,12 @@ func (userInfo *User) IsRecord(DB *gorm.DB) bool {
 func (userInfo *User) Insert(DB *gorm.DB) error {
 	return DB.Create(&userInfo).Error
 }
+
+func Get(DB *gorm.DB, userId string) (*User, error) {
+	var getUser User
+	if err := DB.Where("user_id=?", userId).First(&getUser).Error; err != nil {
+		return nil, err
+	} else {
+		return &getUser, nil
+	}
+}
