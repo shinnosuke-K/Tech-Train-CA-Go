@@ -152,6 +152,7 @@ func (model *Model) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := db.Get(model.db, token["sub"].(string))
 	if err != nil {
 		log.Println(err)
+		return
 	}
 
 	res, err := json.Marshal(map[string]string{
