@@ -149,7 +149,20 @@ func (model *Model) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := parsedToken.Claims.(jwt.MapClaims)
-	fmt.Println(token)
+	user, err := db.Get(model.db, token["sub"].(string))
+	if err != nil {
+		log.Println(err)
+	}
+
+	res, err := json.Marshal(map[string]string{
+		"name": user.UserName,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(res)
+	return
 }
 
 func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
