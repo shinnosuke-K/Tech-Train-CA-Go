@@ -10,7 +10,7 @@
 
 興味があれば、是非登録してみてください↓
 
-<a href="https://techbowl.co.jp/techtrain" target="_blank">ここをクリック</a>
+<a href="https://techbowl.co.jp/techtrain" target="_blank">ここをクリック</a> (別タブに飛びません)
 
 ## 構成
 
