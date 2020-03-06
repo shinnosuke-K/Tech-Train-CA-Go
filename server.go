@@ -168,6 +168,55 @@ func (model *Model) getUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 
+	if r.Method != http.MethodPut {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tokenString := r.Header.Get("x-token")
+	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("%s", "Unexpected signing method")
+
+		} else {
+			keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
+			if err != nil {
+				return nil, err
+			}
+			return keyData, nil
+		}
+	})
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	token := parsedToken.Claims.(jwt.MapClaims)
+	user, err := db.Get(model.db, token["sub"].(string))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	fmt.Println(user)
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var jsonBody map[string]string
+	err = json.Unmarshal(body, &jsonBody)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(jsonBody["name"])
+
 }
 
 func (router *Server) Init() error {
