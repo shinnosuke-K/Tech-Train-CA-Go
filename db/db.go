@@ -17,13 +17,13 @@ func Open() (*gorm.DB, error) {
 }
 
 type User struct {
-	UserId        string    `json:"user_id"`
-	Token         string    `json:"token"`
-	UserName      string    `json:"user_name"`
-	RegTime       time.Time `json:"reg_time"`
-	RegTimeJST    time.Time `json:"reg_time_jst"`
-	UpdateTime    time.Time `json:"update_time"`
-	UpdateTimeJST time.Time `json:"update_time_jst"`
+	UserId        string    `gorm:"type:varchar(32);column:user_id;primary_key"`
+	Token         string    `gorm:"type:varchar(255);column:token"`
+	UserName      string    `gorm:"type:varchar(255);column:user_name"`
+	RegTime       time.Time `gorm:"type:datetime;column:reg_time"`
+	RegTimeJST    time.Time `gorm:"type:datetime;column:reg_time_jst"`
+	UpdateTime    time.Time `gorm:"type:datetime;column:update_time"`
+	UpdateTimeJST time.Time `gorm:"type:datetime;column:update_time_jst"`
 }
 
 func (userInfo *User) IsRecord(DB *gorm.DB) bool {
@@ -45,5 +45,14 @@ func Get(DB *gorm.DB, userId string) (*User, error) {
 		return nil, err
 	} else {
 		return &getUser, nil
+	}
+}
+
+func Update(DB *gorm.DB, updateInfo User) error {
+
+	if err := DB.Model(&User{}).Updates(updateInfo).Error; err != nil {
+		return err
+	} else {
+		return nil
 	}
 }
