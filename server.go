@@ -78,16 +78,14 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	jst, _ := time.LoadLocation("Asia/Tokyo")
 	createTimeJST := createTimeUTC.In(jst)
 
-	account.RegTime = createTimeUTC
 	account.RegTimeJST = createTimeJST
-	account.UpdateTime = createTimeUTC
 	account.UpdateTimeJST = createTimeJST
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":  account.UserId,
 		"user": account.UserName,
-		"nbf":  account.RegTime,
-		"iat":  account.RegTime,
+		"nbf":  account.RegTimeJST,
+		"iat":  account.RegTimeJST,
 	})
 
 	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
