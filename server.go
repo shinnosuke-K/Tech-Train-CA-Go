@@ -82,10 +82,9 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	account.UpdateTimeJST = createTimeJST
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":  account.UserId,
-		"user": account.UserName,
-		"nbf":  account.RegTimeJST,
-		"iat":  account.RegTimeJST,
+		"sub": account.UserId,
+		"nbf": account.RegTimeJST,
+		"iat": account.RegTimeJST,
 	})
 
 	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
@@ -103,7 +102,6 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	account.Token = tokenString
 
 	if err = account.Insert(model.db); err != nil {
-		fmt.Println(1)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
