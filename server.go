@@ -74,20 +74,17 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}(&account)
 
-	createTimeUTC := time.Now().UTC()
+	timeUTC := time.Now().UTC()
 	jst, _ := time.LoadLocation("Asia/Tokyo")
-	createTimeJST := createTimeUTC.In(jst)
+	createTimeJST := timeUTC.In(jst)
 
-	account.RegTime = createTimeUTC
 	account.RegTimeJST = createTimeJST
-	account.UpdateTime = createTimeUTC
 	account.UpdateTimeJST = createTimeJST
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":  account.UserId,
-		"user": account.UserName,
-		"nbf":  account.RegTime,
-		"iat":  account.RegTime,
+		"sub": account.UserId,
+		"nbf": account.RegTimeJST,
+		"iat": account.RegTimeJST,
 	})
 
 	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
@@ -105,7 +102,6 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	account.Token = tokenString
 
 	if err = account.Insert(model.db); err != nil {
-		fmt.Println(1)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -219,10 +215,10 @@ func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var updateInfo db.User
 	updateInfo.UserId = tokenMap["sub"].(string)
 	updateInfo.UserName = jsonBody["name"]
-	updateTimeUTC := time.Now().UTC()
+
+	timeUTC := time.Now().UTC()
 	jst, _ := time.LoadLocation("Asia/Tokyo")
-	updateTimeJST := updateTimeUTC.In(jst)
-	updateInfo.UpdateTime = updateTimeUTC
+	updateTimeJST := timeUTC.In(jst)
 	updateInfo.UpdateTimeJST = updateTimeJST
 
 	if err := db.Update(model.db, updateInfo); err != nil {

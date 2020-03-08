@@ -5,7 +5,6 @@ create table if not exists possessions (
     posse_id varchar(20) not null primary key,
     user_id varchar(20) not null,
     chara_id varchar(20) not null,
-    reg_time datetime,
     reg_time_jst datetime
 );
 

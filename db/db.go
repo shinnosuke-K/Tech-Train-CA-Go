@@ -20,9 +20,7 @@ type User struct {
 	UserId        string    `gorm:"type:varchar(32);column:user_id;primary_key"`
 	Token         string    `gorm:"type:varchar(255);column:token"`
 	UserName      string    `gorm:"type:varchar(255);column:user_name"`
-	RegTime       time.Time `gorm:"type:datetime;column:reg_time"`
 	RegTimeJST    time.Time `gorm:"type:datetime;column:reg_time_jst"`
-	UpdateTime    time.Time `gorm:"type:datetime;column:update_time"`
 	UpdateTimeJST time.Time `gorm:"type:datetime;column:update_time_jst"`
 }
 
