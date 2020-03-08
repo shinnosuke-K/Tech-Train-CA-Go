@@ -74,9 +74,9 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}(&account)
 
-	createTimeUTC := time.Now().UTC()
+	timeUTC := time.Now().UTC()
 	jst, _ := time.LoadLocation("Asia/Tokyo")
-	createTimeJST := createTimeUTC.In(jst)
+	createTimeJST := timeUTC.In(jst)
 
 	account.RegTimeJST = createTimeJST
 	account.UpdateTimeJST = createTimeJST
@@ -217,10 +217,10 @@ func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var updateInfo db.User
 	updateInfo.UserId = tokenMap["sub"].(string)
 	updateInfo.UserName = jsonBody["name"]
-	updateTimeUTC := time.Now().UTC()
+
+	timeUTC := time.Now().UTC()
 	jst, _ := time.LoadLocation("Asia/Tokyo")
-	updateTimeJST := updateTimeUTC.In(jst)
-	updateInfo.UpdateTime = updateTimeUTC
+	updateTimeJST := timeUTC.In(jst)
 	updateInfo.UpdateTimeJST = updateTimeJST
 
 	if err := db.Update(model.db, updateInfo); err != nil {
