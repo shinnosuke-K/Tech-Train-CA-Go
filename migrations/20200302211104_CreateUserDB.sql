@@ -4,9 +4,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     user_id varchar(32) not null primary key,
     token varchar(255),
     user_name varchar(255),
-    reg_time datetime,
     reg_time_jst datetime,
-    update_time datetime,
     update_time_jst datetime
 );
 

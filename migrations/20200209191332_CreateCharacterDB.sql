@@ -4,7 +4,6 @@
 create table if not exists characters (
     chara_id varchar(20) not null primary key,
     chara_name varchar(255),
-    reg_time datetime,
     reg_time_jst datetime,
     rare int
 );
