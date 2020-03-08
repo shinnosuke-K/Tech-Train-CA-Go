@@ -192,14 +192,14 @@ func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := parsedToken.Claims.(jwt.MapClaims)
-	user, err := db.Get(model.db, token["sub"].(string))
-	if err != nil {
-		log.Println(err)
+	tokenMap := parsedToken.Claims.(jwt.MapClaims)
+
+	var accountInfo db.User
+	accountInfo.UserId = tokenMap["sub"].(string)
+	if accountInfo.IsRecord(model.db) {
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	fmt.Println(user)
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -215,8 +215,23 @@ func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(jsonBody["name"])
 
+	var updateInfo db.User
+	updateInfo.UserId = tokenMap["sub"].(string)
+	updateInfo.UserName = jsonBody["name"]
+	updateTimeUTC := time.Now().UTC()
+	jst, _ := time.LoadLocation("Asia/Tokyo")
+	updateTimeJST := updateTimeUTC.In(jst)
+	updateInfo.UpdateTime = updateTimeUTC
+	updateInfo.UpdateTimeJST = updateTimeJST
+
+	if err := db.Update(model.db, updateInfo); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	return
 }
 
 func (router *Server) Init() error {
