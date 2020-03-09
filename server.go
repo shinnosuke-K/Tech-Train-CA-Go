@@ -10,13 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/db"
-
 	"github.com/dgrijalva/jwt-go"
-
 	"github.com/google/uuid"
-
 	"github.com/jinzhu/gorm"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/db"
 )
 
 type Server struct {
@@ -63,21 +60,15 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	account.UserName = name
 	account.UserId = createUserId()
-	// 要検討
-	go func(account *db.User) {
-		for {
-			if account.IsRecord(model.db) {
-				account.UserId = createUserId()
-			} else {
-				break
-			}
+	for {
+		if account.IsRecord(model.db) {
+			account.UserId = createUserId()
+		} else {
+			break
 		}
-	}(&account)
+	}
 
-	timeUTC := time.Now().UTC()
-	jst, _ := time.LoadLocation("Asia/Tokyo")
-	createTimeJST := timeUTC.In(jst)
-
+	createTimeJST := getJSTTime()
 	account.RegTimeJST = createTimeJST
 	account.UpdateTimeJST = createTimeJST
 
@@ -124,18 +115,7 @@ func (model *Model) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenString := r.Header.Get("x-token")
-	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("%s", "Unexpected signing method")
-
-		} else {
-			keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
-			if err != nil {
-				return nil, err
-			}
-			return keyData, nil
-		}
-	})
+	parsedToken, err := parsedJWTToken(tokenString)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -168,18 +148,7 @@ func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenString := r.Header.Get("x-token")
-	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("%s", "Unexpected signing method")
-
-		} else {
-			keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
-			if err != nil {
-				return nil, err
-			}
-			return keyData, nil
-		}
-	})
+	parsedToken, err := parsedJWTToken(tokenString)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -214,10 +183,7 @@ func (model *Model) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	updateInfo.UserId = tokenMap["sub"].(string)
 	updateInfo.UserName = jsonBody["name"]
 
-	timeUTC := time.Now().UTC()
-	jst, _ := time.LoadLocation("Asia/Tokyo")
-	updateTimeJST := timeUTC.In(jst)
-	updateInfo.UpdateTimeJST = updateTimeJST
+	updateInfo.UpdateTimeJST = getJSTTime()
 
 	if err := db.Update(model.db, updateInfo); err != nil {
 		log.Println(err)
@@ -255,6 +221,28 @@ func (router *Server) Run(port string) {
 func createUserId() string {
 	userId := uuid.Must(uuid.NewRandom())
 	return strings.ReplaceAll(userId.String(), "-", "")
+}
+
+func getJSTTime() time.Time {
+	timeUTC := time.Now().UTC()
+	jst, _ := time.LoadLocation("Asia/Tokyo")
+	updateTimeJST := timeUTC.In(jst)
+	return updateTimeJST
+}
+
+func parsedJWTToken(tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("%s", "Unexpected signing method")
+
+		} else {
+			keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
+			if err != nil {
+				return nil, err
+			}
+			return keyData, nil
+		}
+	})
 }
 
 func main() {
