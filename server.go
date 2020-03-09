@@ -99,15 +99,13 @@ func (model *Model) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	account.Token = tokenString
-
 	if err = account.Insert(model.db); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res, err := json.Marshal(map[string]string{
-		"token": account.Token,
+		"token": tokenString,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
