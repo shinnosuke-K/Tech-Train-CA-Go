@@ -26,9 +26,9 @@ type User struct {
 func (userInfo *User) IsRecord(DB *gorm.DB) bool {
 	var user User
 	if err := DB.Where("user_id=?", userInfo.UserId).First(&user).Error; gorm.IsRecordNotFoundError(err) {
-		return true
-	} else {
 		return false
+	} else {
+		return true
 	}
 }
 
