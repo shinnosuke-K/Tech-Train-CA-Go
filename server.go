@@ -27,7 +27,6 @@ func (router *Server) Init() error {
 		return err
 	}
 
-	//model := Model{db: connectedDB}
 	ctr := controller.New(connectedDB)
 
 	// http method ごとの処理(handler)
