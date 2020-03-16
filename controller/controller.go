@@ -31,6 +31,7 @@ func (ctr *Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -38,6 +39,7 @@ func (ctr *Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 	var jsonBody map[string]string
 	err = json.Unmarshal(body, &jsonBody)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -72,17 +74,20 @@ func (ctr *Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 
 	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	tokenString, err := token.SignedString(keyData)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	if err = account.Insert(ctr.DB); err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -91,6 +96,7 @@ func (ctr *Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 		"token": tokenString,
 	})
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -110,6 +116,7 @@ func (ctr *Controller) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	parsedToken, err := util.ParsedJWTToken(tokenString)
 
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -118,6 +125,7 @@ func (ctr *Controller) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := db.Get(ctr.DB, token["sub"].(string))
 	if err != nil {
 		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -125,6 +133,7 @@ func (ctr *Controller) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		"name": user.UserName,
 	})
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -143,6 +152,7 @@ func (ctr *Controller) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	parsedToken, err := util.ParsedJWTToken(tokenString)
 
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
