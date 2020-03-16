@@ -1,0 +1,12 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:latest
+    container_name: tech_train_mysql
+    ports:
+    - "3306:3306"
+    volumes:
+      - $PWD/mysql/db:/docker-entrypoint-initdb.d
+      - $PWD/my.cnf:/etc/mysql/conf.d/my.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=$DB_PASSWORD

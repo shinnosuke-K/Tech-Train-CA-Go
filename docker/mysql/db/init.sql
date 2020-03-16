@@ -1,0 +1,1 @@
+create database if not exists tech_train_ca_go;
