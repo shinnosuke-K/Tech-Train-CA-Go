@@ -4,4 +4,4 @@ out
 gen
 docker-mysql/
 rsa/*
-docker/.env
+.env

@@ -18,10 +18,8 @@ func CreateUserId() string {
 }
 
 func GetJSTTime() time.Time {
-	timeUTC := time.Now().UTC()
-	jst, _ := time.LoadLocation("Asia/Tokyo")
-	updateTimeJST := timeUTC.In(jst)
-	return updateTimeJST
+	timeUTC := time.Now().UTC().Local()
+	return timeUTC
 }
 
 func ParsedJWTToken(tokenString string) (*jwt.Token, error) {

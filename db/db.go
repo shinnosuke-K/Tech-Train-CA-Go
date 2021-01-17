@@ -11,16 +11,16 @@ import (
 
 func Open() (*gorm.DB, error) {
 
-	connectTemplate := "%s:%s@/%s?%s"
+	connectTemplate := "%s:%s@tcp(db:3306)/%s?%s"
 	connectPath := fmt.Sprintf(connectTemplate, os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_OPTION"))
 	return gorm.Open("mysql", connectPath)
 }
 
 type User struct {
-	UserId        string    `gorm:"type:varchar(32);column:user_id;primary_key"`
-	UserName      string    `gorm:"type:varchar(255);column:user_name"`
-	RegTimeJST    time.Time `gorm:"type:datetime;column:reg_time_jst"`
-	UpdateTimeJST time.Time `gorm:"type:datetime;column:update_time_jst"`
+	UserId   string    `gorm:"type:varchar(32);column:user_id;primary_key"`
+	UserName string    `gorm:"type:varchar(255);column:user_name"`
+	RegAt    time.Time `gorm:"type:datetime;column:reg_at"`
+	UpdateAt time.Time `gorm:"type:datetime;column:update_at"`
 }
 
 func (userInfo *User) IsRecord(DB *gorm.DB) bool {

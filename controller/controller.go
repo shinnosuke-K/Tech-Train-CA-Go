@@ -63,13 +63,13 @@ func (ctr *Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	createTimeJST := util.GetJSTTime()
-	account.RegTimeJST = createTimeJST
-	account.UpdateTimeJST = createTimeJST
+	account.RegAt = createTimeJST
+	account.UpdateAt = createTimeJST
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": account.UserId,
-		"nbf": account.RegTimeJST,
-		"iat": account.RegTimeJST,
+		"nbf": account.RegAt,
+		"iat": account.RegAt,
 	})
 
 	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
@@ -185,7 +185,7 @@ func (ctr *Controller) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	updateInfo.UserId = tokenMap["sub"].(string)
 	updateInfo.UserName = jsonBody["name"]
 
-	updateInfo.UpdateTimeJST = util.GetJSTTime()
+	updateInfo.UpdateAt = util.GetJSTTime()
 
 	if err := db.Update(ctr.DB, updateInfo); err != nil {
 		log.Println(err)
