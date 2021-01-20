@@ -26,7 +26,7 @@ func NewUserUseCase(ur repository.UserRepository) UserUseCase {
 }
 
 func (u userUseCase) IsRecord(ctx context.Context, id int) bool {
-	panic("implement me")
+	return u.IsRecord(ctx, id)
 }
 
 func (u userUseCase) Add(user *model.User) error {
