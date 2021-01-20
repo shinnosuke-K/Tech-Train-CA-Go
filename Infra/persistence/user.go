@@ -30,7 +30,7 @@ func (u userPersistence) IsRecord(ctx context.Context, id int) bool {
 	return true
 }
 
-func (u userPersistence) Add(ctx context.Context) error {
+func (u userPersistence) Add(user *model.User) error {
 	panic("implement me")
 }
 

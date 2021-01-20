@@ -10,7 +10,7 @@ import (
 
 type UserUseCase interface {
 	IsRecord(ctx context.Context, id int) bool
-	Add(ctx context.Context) error
+	Add(user *model.User) error
 	Get(ctx context.Context, id int) (*model.User, error)
 	Update(ctx context.Context) error
 }
@@ -29,7 +29,7 @@ func (u userUseCase) IsRecord(ctx context.Context, id int) bool {
 	panic("implement me")
 }
 
-func (u userUseCase) Add(ctx context.Context) error {
+func (u userUseCase) Add(user *model.User) error {
 	panic("implement me")
 }
 
