@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/Infra/persistence"
+	handler "github.com/shinnosuke-K/Tech-Train-CA-Go/handler/api"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
+
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/controller"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/db"
 )
@@ -42,6 +46,12 @@ func (router *Server) Run(port string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func initUserHandler() handler.UserHandler {
+	userPersistence := persistence.NewUserPersistence()
+	userUseCase := usecase.NewUserUseCase(userPersistence)
+	return handler.NewUserHandler(userUseCase)
 }
 
 func main() {
