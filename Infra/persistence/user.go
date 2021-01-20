@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"log"
 
 	"github.com/jinzhu/gorm"
 
@@ -20,7 +21,13 @@ func NewUserPersistence(db *gorm.DB) repository.UserRepository {
 }
 
 func (u userPersistence) IsRecord(ctx context.Context, id int) bool {
-	panic("implement me")
+	var user model.User
+	err := u.DB.Where("user_id=?", id).First(&user).Error
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
 }
 
 func (u userPersistence) Add(ctx context.Context) error {
