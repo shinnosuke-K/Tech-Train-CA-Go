@@ -1,18 +1,16 @@
 package usecase
 
 import (
-	"context"
-
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
 )
 
 type UserUseCase interface {
-	IsRecord(ctx context.Context, id int) bool
+	IsRecord(id int) bool
 	Add(user *model.User) error
-	Get(ctx context.Context, id int) (*model.User, error)
-	Update(ctx context.Context) error
+	Get(id int) (*model.User, error)
+	Update() error
 }
 
 type userUseCase struct {
@@ -25,18 +23,18 @@ func NewUserUseCase(ur repository.UserRepository) UserUseCase {
 	}
 }
 
-func (u userUseCase) IsRecord(ctx context.Context, id int) bool {
-	return u.IsRecord(ctx, id)
+func (u userUseCase) IsRecord(id int) bool {
+	return u.IsRecord(id)
 }
 
 func (u userUseCase) Add(user *model.User) error {
 	panic("implement me")
 }
 
-func (u userUseCase) Get(ctx context.Context, id int) (*model.User, error) {
+func (u userUseCase) Get(id int) (*model.User, error) {
 	panic("implement me")
 }
 
-func (u userUseCase) Update(ctx context.Context) error {
+func (u userUseCase) Update() error {
 	panic("implement me")
 }
