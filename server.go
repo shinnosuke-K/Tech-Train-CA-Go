@@ -8,10 +8,10 @@ import (
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/Infra/persistence"
 	handler "github.com/shinnosuke-K/Tech-Train-CA-Go/handler/api"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/db"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/controller"
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/db"
 )
 
 type Server struct {
@@ -48,8 +48,10 @@ func (router *Server) Run(port string) {
 	}
 }
 
+var DB, _ = db.Open()
+
 func initUserHandler() handler.UserHandler {
-	userPersistence := persistence.NewUserPersistence()
+	userPersistence := persistence.NewUserPersistence(DB)
 	userUseCase := usecase.NewUserUseCase(userPersistence)
 	return handler.NewUserHandler(userUseCase)
 }

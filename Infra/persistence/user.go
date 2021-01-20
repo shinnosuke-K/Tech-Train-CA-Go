@@ -3,14 +3,20 @@ package persistence
 import (
 	"context"
 
+	"github.com/jinzhu/gorm"
+
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
 )
 
-type userPersistence struct{}
+type userPersistence struct {
+	DB *gorm.DB
+}
 
-func NewUserPersistence() repository.UserRepository {
-	return &userPersistence{}
+func NewUserPersistence(db *gorm.DB) repository.UserRepository {
+	return &userPersistence{
+		DB: db,
+	}
 }
 
 func (u userPersistence) IsRecord(ctx context.Context, id int) bool {
