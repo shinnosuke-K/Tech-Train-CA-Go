@@ -7,12 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/auth"
-
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
-
 	"github.com/google/uuid"
-
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/auth"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
 
@@ -90,24 +86,17 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	account := model.User{
-		UserId:   userId,
-		UserName: name,
-		RegAt:    regTime,
-		UpdateAt: regTime,
-	}
-
-	if err = u.userUseCase.Add(&account); err != nil {
+	if err = u.userUseCase.Add(userId, name, regTime); err != nil {
 		http.Error(w, "couldn't create account", http.StatusInternalServerError)
 		return
 	}
 
 	type response struct {
-		token string `json:"token"`
+		Token string `json:"token"`
 	}
 
 	res := new(response)
-	res.token = tokenString
+	res.Token = tokenString
 	w.Header().Set("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)

@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
@@ -9,7 +11,7 @@ import (
 
 type UserUseCase interface {
 	IsRecord(id string) bool
-	Add(user *model.User) error
+	Add(id, name string, regTime time.Time) error
 	Get(id string) (*model.User, error)
 	Update() error
 }
@@ -28,8 +30,16 @@ func (u userUseCase) IsRecord(id string) bool {
 	return u.IsRecord(id)
 }
 
-func (u userUseCase) Add(user *model.User) error {
-	if err := u.Add(user); err != nil {
+func (u userUseCase) Add(id, name string, regTime time.Time) error {
+
+	user := model.User{
+		UserId:   id,
+		UserName: name,
+		RegAt:    regTime,
+		UpdateAt: regTime,
+	}
+
+	if err := u.userRepository.Add(&user); err != nil {
 		return errors.Wrap(err, "user table couldn't create")
 	}
 	return nil
