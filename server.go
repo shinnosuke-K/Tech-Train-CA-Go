@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/Infra/persistence"
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/db"
 	handler "github.com/shinnosuke-K/Tech-Train-CA-Go/handler/api"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/db"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
 
