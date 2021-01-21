@@ -31,7 +31,7 @@ func NewUserHandler(uu usecase.UserUseCase) UserHandler {
 func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "bad request method", http.StatusBadRequest)
+		http.Error(w, "bad request method", http.StatusMethodNotAllowed)
 		return
 	}
 
