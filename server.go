@@ -7,11 +7,9 @@ import (
 	"os"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/Infra/persistence"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/db"
 	handler "github.com/shinnosuke-K/Tech-Train-CA-Go/handler/api"
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/db"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
-
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/controller"
 )
 
 type Server struct {
@@ -24,21 +22,19 @@ func NewServer() *Server {
 	}
 }
 
-func (router *Server) Init() error {
-	// db.open の処理
-	connectedDB, err := db.Open()
-	if err != nil {
-		return err
-	}
+var DB, _ = db.Open()
 
-	ctr := controller.New(connectedDB)
+func initUserHandler() handler.UserHandler {
+	userPersistence := persistence.NewUserPersistence(DB)
+	userUseCase := usecase.NewUserUseCase(userPersistence)
+	return handler.NewUserHandler(userUseCase)
+}
 
-	// http method ごとの処理(handler)
-	router.Engine.HandleFunc("/user/create", ctr.CreateUserHandler)
-	router.Engine.HandleFunc("/user/get", ctr.GetUserHandler)
-	router.Engine.HandleFunc("/user/update", ctr.UpdateUserHandler)
+func (router *Server) Init() {
 
-	return nil
+	userHandler := initUserHandler()
+	router.Engine.HandleFunc("/user/create", userHandler.Create)
+
 }
 
 func (router *Server) Run(port string) {
@@ -48,20 +44,10 @@ func (router *Server) Run(port string) {
 	}
 }
 
-var DB, _ = db.Open()
-
-func initUserHandler() handler.UserHandler {
-	userPersistence := persistence.NewUserPersistence(DB)
-	userUseCase := usecase.NewUserUseCase(userPersistence)
-	return handler.NewUserHandler(userUseCase)
-}
-
 func main() {
 
 	server := NewServer()
-	if err := server.Init(); err != nil {
-		log.Fatal(err)
-	}
+	server.Init()
 
 	port := os.Getenv("PORT")
 	if port == "" {
