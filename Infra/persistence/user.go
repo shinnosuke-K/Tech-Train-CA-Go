@@ -30,7 +30,10 @@ func (u userPersistence) IsRecord(id string) bool {
 }
 
 func (u userPersistence) Add(user *model.User) error {
-	panic("implement me")
+	if err := u.DB.Create(*user).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u userPersistence) Get(id string) (*model.User, error) {
