@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
+	"github.com/pkg/errors"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
 )
@@ -28,7 +28,10 @@ func (u userUseCase) IsRecord(id int) bool {
 }
 
 func (u userUseCase) Add(user *model.User) error {
-	panic("implement me")
+	if err := u.Add(user); err != nil {
+		return errors.Wrap(err, "user table couldn't create")
+	}
+	return nil
 }
 
 func (u userUseCase) Get(id int) (*model.User, error) {
