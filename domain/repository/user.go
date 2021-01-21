@@ -5,8 +5,8 @@ import (
 )
 
 type UserRepository interface {
-	IsRecord(id int) bool
+	IsRecord(id string) bool
 	Add(user *model.User) error
-	Get(id int) (*model.User, error)
+	Get(id string) (*model.User, error)
 	Update() error
 }

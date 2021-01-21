@@ -19,7 +19,7 @@ func NewUserPersistence(db *gorm.DB) repository.UserRepository {
 	}
 }
 
-func (u userPersistence) IsRecord(id int) bool {
+func (u userPersistence) IsRecord(id string) bool {
 	var user model.User
 	err := u.DB.Where("user_id=?", id).First(&user).Error
 	if err != nil {
@@ -33,7 +33,7 @@ func (u userPersistence) Add(user *model.User) error {
 	panic("implement me")
 }
 
-func (u userPersistence) Get(id int) (*model.User, error) {
+func (u userPersistence) Get(id string) (*model.User, error) {
 	panic("implement me")
 }
 

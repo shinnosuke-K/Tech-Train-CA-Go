@@ -4,12 +4,13 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
 )
 
 type UserUseCase interface {
-	IsRecord(id int) bool
+	IsRecord(id string) bool
 	Add(user *model.User) error
-	Get(id int) (*model.User, error)
+	Get(id string) (*model.User, error)
 	Update() error
 }
 
@@ -23,7 +24,7 @@ func NewUserUseCase(ur repository.UserRepository) UserUseCase {
 	}
 }
 
-func (u userUseCase) IsRecord(id int) bool {
+func (u userUseCase) IsRecord(id string) bool {
 	return u.IsRecord(id)
 }
 
@@ -34,7 +35,7 @@ func (u userUseCase) Add(user *model.User) error {
 	return nil
 }
 
-func (u userUseCase) Get(id int) (*model.User, error) {
+func (u userUseCase) Get(id string) (*model.User, error) {
 	panic("implement me")
 }
 
