@@ -27,7 +27,7 @@ func NewUserUseCase(ur repository.UserRepository) UserUseCase {
 }
 
 func (u userUseCase) IsRecord(id string) bool {
-	return u.IsRecord(id)
+	return u.userRepository.IsRecord(id)
 }
 
 func (u userUseCase) Add(id, name string, regTime time.Time) error {
