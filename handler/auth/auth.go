@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 
 	"github.com/pkg/errors"
 
@@ -13,8 +12,8 @@ import (
 
 type Auth struct {
 	Id  string
-	Nbf time.Time
-	Iat time.Time
+	Nbf string
+	Iat string
 }
 
 func CreateJwt(claims jwt.MapClaims) *jwt.Token {
@@ -35,8 +34,9 @@ func ParseToken(token string) (*Auth, error) {
 		return keyData, nil
 	})
 
+	// 要修正
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse authorization")
+		return nil, errors.Wrap(err, "failed to parse authorization")
 	}
 
 	t, ok := parsedToken.Claims.(jwt.MapClaims)
@@ -49,12 +49,12 @@ func ParseToken(token string) (*Auth, error) {
 		return nil, errors.New("failed to parse authorization")
 	}
 
-	nbf, ok := t["nbf"].(time.Time)
+	nbf, ok := t["nbf"].(string)
 	if !ok {
 		return nil, errors.New("failed to parse authorization")
 	}
 
-	iat, ok := t["iat"].(time.Time)
+	iat, ok := t["iat"].(string)
 	if !ok {
 		return nil, errors.New("failed to parse authorization")
 	}
@@ -64,5 +64,4 @@ func ParseToken(token string) (*Auth, error) {
 		Nbf: nbf,
 		Iat: iat,
 	}, nil
-
 }
