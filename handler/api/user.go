@@ -56,6 +56,7 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 	name := jsonBody["name"]
 	if name == "" {
 		http.Error(w, "name is empty", http.StatusBadRequest)
+		return
 	}
 
 	userId := uuid.New().String()
