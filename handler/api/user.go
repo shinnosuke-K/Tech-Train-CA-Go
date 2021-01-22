@@ -69,9 +69,9 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 	regTime := time.Now().Local()
 
 	token := auth.CreateJwt(map[string]interface{}{
-		"sub": userId,
-		"nbf": regTime,
-		"iat": regTime,
+		"user_id": userId,
+		"nbf":     regTime,
+		"iat":     regTime,
 	})
 
 	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
