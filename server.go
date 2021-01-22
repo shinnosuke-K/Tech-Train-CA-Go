@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/Infra/persistence"
 	handler "github.com/shinnosuke-K/Tech-Train-CA-Go/handler/api"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/db"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/persistence"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
 
