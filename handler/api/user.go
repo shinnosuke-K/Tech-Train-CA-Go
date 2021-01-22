@@ -106,7 +106,42 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u userHandler) Get(w http.ResponseWriter, r *http.Request) {
-	panic("implement me")
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "bad request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	xToken := r.Header.Get("x-token")
+	if xToken == "" {
+		http.Error(w, "x-token is empty", http.StatusUnauthorized)
+		return
+	}
+
+	authedUser, err := auth.ParseToken(xToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	account, err := u.userUseCase.Get(authedUser.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	type response struct {
+		Name string
+	}
+
+	res := new(response)
+	res.Name = account.UserName
+	w.Header().Set("Content-Type", "application/json")
+	if err = json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	return
 }
 
 func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {

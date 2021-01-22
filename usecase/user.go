@@ -46,7 +46,13 @@ func (u userUseCase) Add(id, name string, regTime time.Time) error {
 }
 
 func (u userUseCase) Get(id string) (*model.User, error) {
-	panic("implement me")
+
+	user, err := u.userRepository.Get(id)
+	if err != nil {
+		return nil, errors.Wrapf(err, "not found id=%s", id)
+	}
+
+	return user, nil
 }
 
 func (u userUseCase) Update() error {
