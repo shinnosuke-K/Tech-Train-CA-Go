@@ -146,5 +146,53 @@ func (u userHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
-	panic("implement me")
+
+	if r.Method != http.MethodPut {
+		http.Error(w, "bad request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	xToken := r.Header.Get("x-token")
+	if xToken == "" {
+		http.Error(w, "x-token is empty", http.StatusUnauthorized)
+		return
+	}
+
+	authedUser, err := auth.ParseToken(xToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "body couldn't read", http.StatusBadRequest)
+		return
+	}
+
+	if len(body) == 0 {
+		http.Error(w, "body is empty", http.StatusBadRequest)
+		return
+	}
+
+	var jsonBody map[string]string
+	if err := json.Unmarshal(body, &jsonBody); err != nil {
+		http.Error(w, "body couldn't convert to json", http.StatusBadRequest)
+		return
+	}
+
+	name := jsonBody["name"]
+	if name == "" {
+		http.Error(w, "name is empty", http.StatusBadRequest)
+		return
+	}
+
+	if err := u.userUseCase.Update(authedUser.Id, name); err != nil {
+		http.Error(w, "couldn't update user", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	return
 }

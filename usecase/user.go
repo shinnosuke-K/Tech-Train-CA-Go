@@ -13,7 +13,7 @@ type UserUseCase interface {
 	IsRecord(id string) bool
 	Add(id, name string, regTime time.Time) error
 	Get(id string) (*model.User, error)
-	Update() error
+	Update(id, name string) error
 }
 
 type userUseCase struct {
@@ -55,6 +55,16 @@ func (u userUseCase) Get(id string) (*model.User, error) {
 	return user, nil
 }
 
-func (u userUseCase) Update() error {
-	panic("implement me")
+func (u userUseCase) Update(id, name string) error {
+
+	user := model.User{
+		UserId:   id,
+		UserName: name,
+		UpdateAt: time.Now().Local(),
+	}
+
+	if err := u.userRepository.Update(&user); err != nil {
+		return errors.Wrapf(err, "couldn't update user id=%s, name=%s", id, name)
+	}
+	return nil
 }

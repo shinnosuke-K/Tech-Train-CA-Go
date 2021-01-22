@@ -8,5 +8,5 @@ type UserRepository interface {
 	IsRecord(id string) bool
 	Add(user *model.User) error
 	Get(id string) (*model.User, error)
-	Update() error
+	Update(user *model.User) error
 }

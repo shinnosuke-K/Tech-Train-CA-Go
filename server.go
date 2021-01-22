@@ -35,6 +35,7 @@ func (router *Server) Init() {
 	userHandler := initUserHandler()
 	router.Engine.HandleFunc("/user/create", userHandler.Create)
 	router.Engine.HandleFunc("/user/get", userHandler.Get)
+	router.Engine.HandleFunc("/user/update", userHandler.Update)
 
 }
 

@@ -44,6 +44,9 @@ func (u userPersistence) Get(id string) (*model.User, error) {
 	return &user, nil
 }
 
-func (u userPersistence) Update() error {
-	panic("implement me")
+func (u userPersistence) Update(user *model.User) error {
+	if err := u.DB.Model(&model.User{}).Update(user).Error; err != nil {
+		return err
+	}
+	return nil
 }
