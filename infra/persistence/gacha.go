@@ -17,9 +17,17 @@ func NewGachaPersistence(db *gorm.DB) repository.GachaRepository {
 }
 
 func (g gachaPersistence) GetRareRate() ([]*model.Gacha, error) {
-	panic("implement me")
+	var gachaRate []*model.Gacha
+	if err := g.DB.Find(&gachaRate).Error; err != nil {
+		return nil, err
+	}
+	return gachaRate, nil
 }
 
 func (g gachaPersistence) GetCharacter() ([]*model.Character, error) {
-	panic("implement me")
+	var characters []*model.Character
+	if err := g.DB.Find(&characters).Error; err != nil {
+		return nil, err
+	}
+	return characters, nil
 }
