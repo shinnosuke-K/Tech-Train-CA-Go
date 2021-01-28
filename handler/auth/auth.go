@@ -16,8 +16,19 @@ type Auth struct {
 	Iat string
 }
 
-func CreateJwt(claims jwt.MapClaims) *jwt.Token {
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+func CreateJwtToken(claims jwt.MapClaims) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
+	if err != nil {
+		return "", err
+	}
+
+	tokenString, err := token.SignedString(keyData)
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }
 
 func ParseToken(token string) (*Auth, error) {
