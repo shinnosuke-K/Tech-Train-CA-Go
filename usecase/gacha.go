@@ -4,17 +4,22 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
+
+	"github.com/google/uuid"
+
 	"github.com/pkg/errors"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
 )
 
 type Result struct {
-	CharaId int
+	CharaId string
 	Name    string
 }
 
 type GachaUseCase interface {
 	Draw(times int) ([]*Result, error)
+	Store(id string, results []*Result) error
 }
 
 type gachaUseCase struct {
@@ -39,6 +44,11 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 		return nil, errors.Wrap(err, "couldn't get the Character record")
 	}
 
+	countMap := make(map[int]int, 0)
+	for _, c := range chara {
+		countMap[c.Rarity] += 1
+	}
+
 	rand.Seed(time.Now().Unix())
 
 	r := make([]*Result, 0, times)
@@ -48,7 +58,7 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 		for _, c := range chara {
 			for _, g := range gacha {
 				if g.Rarity == c.Rarity {
-					total += g.Probability / float64(len(chara))
+					total += g.Probability / float64(countMap[c.Rarity])
 					break
 				}
 			}
@@ -63,4 +73,22 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 	}
 
 	return r, nil
+}
+
+func (g gachaUseCase) Store(id string, results []*Result) error {
+
+	for _, r := range results {
+		posse := model.Possession{
+			PosseId: uuid.New().String(),
+			UserId:  id,
+			CharaId: r.CharaId,
+			RegAt:   time.Now().UTC().Local(),
+		}
+
+		if err := g.gachaRepository.Store(&posse); err != nil {
+			return errors.Wrap(err, "couldn't create")
+		}
+	}
+
+	return nil
 }
