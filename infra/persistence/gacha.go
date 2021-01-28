@@ -16,11 +16,6 @@ func NewGachaPersistence(db *gorm.DB) repository.GachaRepository {
 	}
 }
 
-func (g gachaPersistence) IsRecord(table, id string) bool {
-
-	return false
-}
-
 func (g gachaPersistence) GetRareRate() ([]*model.Gacha, error) {
 	var gachaRate []*model.Gacha
 	if err := g.DB.Find(&gachaRate).Error; err != nil {
