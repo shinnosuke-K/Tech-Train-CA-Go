@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -69,21 +68,14 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	regTime := time.Now().Local()
 
-	token := auth.CreateJwt(map[string]interface{}{
+	token, err := auth.CreateJwtToken(map[string]interface{}{
 		"user_id": userId,
 		"nbf":     regTime,
 		"iat":     regTime,
 	})
 
-	keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	tokenString, err := token.SignedString(keyData)
-	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, "couldn't create token", http.StatusInternalServerError)
 		return
 	}
 
@@ -97,7 +89,7 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := new(response)
-	res.Token = tokenString
+	res.Token = token
 	w.Header().Set("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
