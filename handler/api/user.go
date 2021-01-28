@@ -34,12 +34,12 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "body couldn't read", http.StatusBadRequest)
 		return
 	}
+	defer r.Body.Close()
 
 	if len(body) == 0 {
 		http.Error(w, "body is empty", http.StatusBadRequest)
@@ -156,12 +156,12 @@ func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "body couldn't read", http.StatusBadRequest)
 		return
 	}
+	defer r.Body.Close()
 
 	if len(body) == 0 {
 		http.Error(w, "body is empty", http.StatusBadRequest)
