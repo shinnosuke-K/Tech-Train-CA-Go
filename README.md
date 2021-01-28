@@ -17,5 +17,5 @@ Tech Train で行われている Mission を呼ばれる企業から出された
 ## 構成
 
 ## 参考
-https://yyh-gl.github.io/tech-blog/blog/go_web_api/
-https://www.slideshare.net/pospome/go-80591000
+* https://yyh-gl.github.io/tech-blog/blog/go_web_api/
+* https://www.slideshare.net/pospome/go-80591000
