@@ -3,8 +3,8 @@ package model
 import "time"
 
 type Character struct {
-	CharaId   string    `gorm:"type:int;column:chara_id;primary_key"`
-	CharaName string    `gorm:"type:varchar(255);column:chara_name"`
-	RegAt     time.Time `gorm:"type:datetime;column:reg_at"`
-	Rarity    int       `gorm:"type:int;column:rarity"`
+	CharaId   string
+	CharaName string
+	RegAt     time.Time
+	Rarity    int
 }
