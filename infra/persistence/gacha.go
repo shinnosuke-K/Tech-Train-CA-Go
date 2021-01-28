@@ -36,3 +36,10 @@ func (g gachaPersistence) GetCharacter() ([]*model.Character, error) {
 	}
 	return characters, nil
 }
+
+func (g gachaPersistence) Store(p *model.Possession) error {
+	if err := g.DB.Create(&p).Error; err != nil {
+		return err
+	}
+	return nil
+}
