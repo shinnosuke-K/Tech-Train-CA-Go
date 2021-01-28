@@ -79,7 +79,7 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type response struct {
-		Results []*usecase.Result
+		Results []*usecase.Result `json:"results"`
 	}
 
 	res := new(response)
