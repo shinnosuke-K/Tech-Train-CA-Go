@@ -28,7 +28,7 @@ func (c characterPersistence) GetCharacter(id string) (*model.Character, error) 
 
 	var chara model.Character
 	for rows.Next() {
-		if err := rows.Scan(&chara.CharaId, &chara.CharaName, &chara.Rarity, &chara.RegAt); err != nil {
+		if err := rows.Scan(&chara.Id, &chara.Name, &chara.Rarity, &chara.RegAt); err != nil {
 			return nil, errors.WithStack(err)
 		}
 	}
@@ -46,7 +46,7 @@ func (c characterPersistence) GetPossession(userId string) ([]*model.Possession,
 	var possessions []*model.Possession
 	for rows.Next() {
 		var pos model.Possession
-		if err := rows.Scan(&pos.PosseId, &pos.UserId, &pos.CharaId, &pos.RegAt); err != nil {
+		if err := rows.Scan(&pos.Id, &pos.UserId, &pos.CharaId, &pos.RegAt); err != nil {
 			return nil, errors.WithStack(err)
 		}
 
