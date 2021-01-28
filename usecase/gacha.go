@@ -82,7 +82,7 @@ func (g gachaUseCase) Store(id string, results []*Result) error {
 			PosseId: uuid.New().String(),
 			UserId:  id,
 			CharaId: r.CharaId,
-			RegAt:   time.Now().UTC().Local(),
+			RegAt:   time.Now().Local(),
 		}
 
 		if err := g.gachaRepository.Store(&posse); err != nil {
