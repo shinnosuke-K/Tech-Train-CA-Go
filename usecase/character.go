@@ -46,11 +46,10 @@ func (c characterUseCase) List(userId string) ([]*Character, error) {
 		}
 
 		charaList = append(charaList, &Character{
-			UserCharacterId: p.PosseId,
-			CharacterId:     c.CharaId,
-			Name:            c.CharaName,
+			UserCharacterId: p.Id,
+			CharacterId:     c.Id,
+			Name:            c.Name,
 		})
 	}
-
 	return charaList, nil
 }

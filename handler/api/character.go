@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
-
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
 
@@ -62,7 +61,7 @@ func (c characterHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	res := new(response)
 	res.Characters = list
-	w.Header().Set("Content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, "couldn't convert to json", http.StatusInternalServerError)
 		return
