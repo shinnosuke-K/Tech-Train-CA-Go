@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/auth"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
 
@@ -128,7 +128,7 @@ func (u userHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := new(response)
-	res.Name = account.UserName
+	res.Name = account.Name
 	w.Header().Set("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)

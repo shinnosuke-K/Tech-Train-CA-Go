@@ -1,13 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	handler "github.com/shinnosuke-K/Tech-Train-CA-Go/handler/api"
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/db"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/persistence"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
@@ -22,17 +23,15 @@ func NewServer() *Server {
 	}
 }
 
-var DB, _ = db.Open()
-
-func initUserHandler() handler.UserHandler {
-	userPersistence := persistence.NewUserPersistence(DB)
+func initUserHandler(db *sql.DB) handler.UserHandler {
+	userPersistence := persistence.NewUserPersistence(db)
 	userUseCase := usecase.NewUserUseCase(userPersistence)
 	return handler.NewUserHandler(userUseCase)
 }
 
-func (router *Server) Init() {
+func (router *Server) Init(db *sql.DB) {
 
-	userHandler := initUserHandler()
+	userHandler := initUserHandler(db)
 	router.Engine.HandleFunc("/user/create", userHandler.Create)
 	router.Engine.HandleFunc("/user/get", userHandler.Get)
 	router.Engine.HandleFunc("/user/update", userHandler.Update)
@@ -48,8 +47,15 @@ func (router *Server) Run(port string) {
 
 func main() {
 
+	//db, err := db.Open()
+	db, err := db.TestOpen()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
 	server := NewServer()
-	server.Init()
+	server.Init(db)
 
 	port := os.Getenv("PORT")
 	if port == "" {
