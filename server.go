@@ -47,8 +47,7 @@ func (router *Server) Run(port string) {
 
 func main() {
 
-	//db, err := db.Open()
-	db, err := db.TestOpen()
+	db, err := db.Open()
 	if err != nil {
 		log.Fatal(err)
 	}
