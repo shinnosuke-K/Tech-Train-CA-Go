@@ -3,10 +3,10 @@ package api
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/auth"
-
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
 
@@ -37,9 +37,16 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authedUser, err := auth.ParseToken(xToken)
+	if err := auth.Validate(xToken); err != nil {
+		log.Println(err)
+		http.Error(w, "invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	userId, err := auth.Get(xToken, "user_id")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		log.Println(err)
+		http.Error(w, "your token doesn't have user_id", http.StatusBadRequest)
 		return
 	}
 
@@ -73,7 +80,7 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := g.gachaUseCase.Store(authedUser.Id, results); err != nil {
+	if err := g.gachaUseCase.Store(userId, results); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
