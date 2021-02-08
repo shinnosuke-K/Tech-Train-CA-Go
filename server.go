@@ -29,6 +29,12 @@ func initUserHandler(db *sql.DB) handler.UserHandler {
 	return handler.NewUserHandler(userUseCase)
 }
 
+func initGachaHandler(db *sql.DB) handler.GachaHandler {
+	gachaPersistence := persistence.NewGachaPersistence(db)
+	gachaUseCase := usecase.NewGachaUseCase(gachaPersistence)
+	return handler.NewGachaHandler(gachaUseCase)
+}
+
 func (router *Server) Init(db *sql.DB) {
 
 	userHandler := initUserHandler(db)
@@ -36,6 +42,8 @@ func (router *Server) Init(db *sql.DB) {
 	router.Engine.HandleFunc("/user/get", userHandler.Get)
 	router.Engine.HandleFunc("/user/update", userHandler.Update)
 
+	gachaHandler := initGachaHandler(db)
+	router.Engine.HandleFunc("/gacha/draw", gachaHandler.Draw)
 }
 
 func (router *Server) Run(port string) {
@@ -49,9 +57,8 @@ func main() {
 
 	db, err := db.Open()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
-	defer db.Close()
 
 	server := NewServer()
 	server.Init(db)
