@@ -31,9 +31,8 @@ func CreateJwtToken(claims jwt.MapClaims) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(token string) (*Auth, error) {
-
-	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+func rsaPublicKyeFunc() jwt.Keyfunc {
+	return func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("%s", "Unexpected signing method")
 		}
@@ -43,36 +42,89 @@ func ParseToken(token string) (*Auth, error) {
 			return nil, err
 		}
 		return keyData, nil
-	})
+	}
+}
 
-	// 要修正
+func Validate(accessToken string) error {
+
+	token, err := jwt.Parse(accessToken, rsaPublicKyeFunc())
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse authorization")
+		return errors.Wrap(err, "failed to parse authorization")
 	}
 
-	t, ok := parsedToken.Claims.(jwt.MapClaims)
+	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.New("failed to parse authorization")
+		return errors.New("cannot parse claims")
 	}
 
-	id, ok := t["user_id"].(string)
+	if err := validateId(claims); err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err := validateIat(claims); err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err := validateNbf(claims); err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func validateId(claims jwt.MapClaims) error {
+	tokenId, ok := claims["user_id"]
 	if !ok {
-		return nil, errors.New("failed to parse authorization")
+		return errors.New("cannot parse user_id")
 	}
 
-	nbf, ok := t["nbf"].(string)
+	_, ok = tokenId.(string)
 	if !ok {
-		return nil, errors.New("failed to parse authorization")
+		return errors.New("cannot parse user_id")
 	}
+	return nil
+}
 
-	iat, ok := t["iat"].(string)
+func validateNbf(claims jwt.MapClaims) error {
+	tokenNbf, ok := claims["nbf"]
 	if !ok {
-		return nil, errors.New("failed to parse authorization")
+		return errors.New("cannot parse nbf")
 	}
 
-	return &Auth{
-		Id:  id,
-		Nbf: nbf,
-		Iat: iat,
-	}, nil
+	_, ok = tokenNbf.(string)
+	if !ok {
+		return errors.New("cannot parse nbf")
+	}
+	return nil
+}
+
+func validateIat(claims jwt.MapClaims) error {
+	tokenIat, ok := claims["iat"]
+	if !ok {
+		return errors.New("cannot parse iat")
+	}
+
+	_, ok = tokenIat.(string)
+	if !ok {
+		return errors.New("cannot parse iat")
+	}
+	return nil
+}
+
+func Get(accessToken string, key string) (string, error) {
+	token, err := jwt.Parse(accessToken, rsaPublicKyeFunc())
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("failed to convert jwt.MapClaims")
+	}
+
+	value, ok := claims[key].(string)
+	if !ok {
+		return "", fmt.Errorf("not exist key= %s in claims", key)
+	}
+	return value, nil
 }
