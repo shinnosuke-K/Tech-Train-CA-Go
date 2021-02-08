@@ -3,11 +3,12 @@ package api
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/auth"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
 
@@ -111,15 +112,22 @@ func (u userHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authedUser, err := auth.ParseToken(xToken)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+	if err := auth.Validate(xToken); err != nil {
+		log.Println(err)
+		http.Error(w, "invalid token", http.StatusUnauthorized)
 		return
 	}
 
-	account, err := u.userUseCase.Get(authedUser.Id)
+	userId, err := auth.Get(xToken, "user_id")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		log.Println(err)
+		http.Error(w, "your token don't have user_id", http.StatusBadRequest)
+		return
+	}
+
+	account, err := u.userUseCase.Get(userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -128,7 +136,7 @@ func (u userHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := new(response)
-	res.Name = account.UserName
+	res.Name = account.Name
 	w.Header().Set("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -150,9 +158,16 @@ func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authedUser, err := auth.ParseToken(xToken)
+	if err := auth.Validate(xToken); err != nil {
+		log.Println(err)
+		http.Error(w, "invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	userId, err := auth.Get(xToken, "user_id")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		log.Println(err)
+		http.Error(w, "your token don't have user_id", http.StatusBadRequest)
 		return
 	}
 
@@ -180,7 +195,7 @@ func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := u.userUseCase.Update(authedUser.Id, name); err != nil {
+	if err := u.userUseCase.Update(userId, name); err != nil {
 		http.Error(w, "couldn't update user", http.StatusInternalServerError)
 		return
 	}

@@ -1,9 +1,9 @@
 package usecase
 
 import (
+	"fmt"
+	"log"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
@@ -33,14 +33,15 @@ func (u userUseCase) IsRecord(id string) bool {
 func (u userUseCase) Add(id, name string, regTime time.Time) error {
 
 	user := model.User{
-		UserId:   id,
-		UserName: name,
+		ID:       id,
+		Name:     name,
 		RegAt:    regTime,
 		UpdateAt: regTime,
 	}
 
 	if err := u.userRepository.Add(&user); err != nil {
-		return errors.Wrap(err, "user table couldn't create")
+		log.Println(err)
+		return fmt.Errorf("couldn't create name=%s", name)
 	}
 	return nil
 }
@@ -49,7 +50,8 @@ func (u userUseCase) Get(id string) (*model.User, error) {
 
 	user, err := u.userRepository.Get(id)
 	if err != nil {
-		return nil, errors.Wrapf(err, "not found id=%s", id)
+		log.Println(err)
+		return nil, fmt.Errorf("not found id=%s", id)
 	}
 
 	return user, nil
@@ -58,13 +60,14 @@ func (u userUseCase) Get(id string) (*model.User, error) {
 func (u userUseCase) Update(id, name string) error {
 
 	user := model.User{
-		UserId:   id,
-		UserName: name,
+		ID:       id,
+		Name:     name,
 		UpdateAt: time.Now().Local(),
 	}
 
 	if err := u.userRepository.Update(&user); err != nil {
-		return errors.Wrapf(err, "couldn't update user id=%s, name=%s", id, name)
+		log.Println(err)
+		return fmt.Errorf("couldn't update user id=%s, name=%s", id, name)
 	}
 	return nil
 }
