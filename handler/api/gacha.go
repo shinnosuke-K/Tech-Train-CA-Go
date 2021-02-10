@@ -52,6 +52,7 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "body couldn't read", http.StatusBadRequest)
 		return
 	}
@@ -76,11 +77,13 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 
 	results, err := g.gachaUseCase.Draw(times)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := g.gachaUseCase.Store(userId, results); err != nil {
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -93,6 +96,7 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 	res.Results = results
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(res); err != nil {
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
