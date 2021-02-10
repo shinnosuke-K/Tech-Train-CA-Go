@@ -48,7 +48,7 @@ func (g gachaPersistence) GetCharacter() ([]*model.Character, error) {
 	var characters []*model.Character
 	for rows.Next() {
 		var chara model.Character
-		if err := rows.Scan(&chara.CharaId, &chara.CharaName, &chara.Rarity, &chara.RegAt); err != nil {
+		if err := rows.Scan(&chara.Id, &chara.Name, &chara.RegAt, &chara.Rarity); err != nil {
 			return nil, errors.WithStack(err)
 		}
 		characters = append(characters, &chara)
@@ -63,9 +63,14 @@ func (g gachaPersistence) Store(p *model.Possession) error {
 		return errors.WithStack(err)
 	}
 
-	_, err = tx.Query("insert into possessions(id, user_id, chara_id, reg_at) values (?,?,?,?)", p.PosseId, p.UserId, p.CharaId, p.RegAt)
+	_, err = tx.Query("insert into possessions(id, user_id, chara_id, reg_at) values (?,?,?,?)", p.Id, p.UserId, p.CharaId, p.RegAt)
 	if err != nil {
 		return errors.WithStack(err)
 	}
+
+	if err := tx.Commit(); err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
