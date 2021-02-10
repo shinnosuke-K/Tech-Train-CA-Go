@@ -42,14 +42,14 @@ func (c characterHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, err := auth.Get(xToken, "user_id")
+	userID, err := auth.Get(xToken, "user_id")
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "your token don't have user_id", http.StatusBadRequest)
 		return
 	}
 
-	list, err := c.characterUseCase.List(userId)
+	list, err := c.characterUseCase.List(userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -64,7 +64,7 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 			}
 			if total >= p {
 				r = append(r, &Result{
-					CharaId: c.Id,
+					CharaId: c.ID,
 					Name:    c.Name,
 				})
 				break
@@ -79,9 +79,9 @@ func (g gachaUseCase) Store(id string, results []*Result) error {
 
 	for _, r := range results {
 		posse := model.Possession{
-			Id:      uuid.New().String(),
-			UserId:  id,
-			CharaId: r.CharaId,
+			ID:      uuid.New().String(),
+			UserID:  id,
+			CharaID: r.CharaId,
 			RegAt:   time.Now().Local(),
 		}
 

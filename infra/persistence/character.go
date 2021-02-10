@@ -28,7 +28,7 @@ func (c characterPersistence) GetCharacter(id string) (*model.Character, error) 
 
 	var chara model.Character
 	for rows.Next() {
-		if err := rows.Scan(&chara.Id, &chara.Name, &chara.RegAt, &chara.Rarity); err != nil {
+		if err := rows.Scan(&chara.ID, &chara.Name, &chara.RegAt, &chara.Rarity); err != nil {
 			return nil, errors.WithStack(err)
 		}
 	}
@@ -36,9 +36,9 @@ func (c characterPersistence) GetCharacter(id string) (*model.Character, error) 
 	return &chara, nil
 }
 
-func (c characterPersistence) GetPossession(userId string) ([]*model.Possession, error) {
+func (c characterPersistence) GetPossession(userID string) ([]*model.Possession, error) {
 
-	rows, err := c.DB.Query("select * from possessions where user_id = ?", userId)
+	rows, err := c.DB.Query("select * from possessions where user_id = ?", userID)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -46,7 +46,7 @@ func (c characterPersistence) GetPossession(userId string) ([]*model.Possession,
 	var possessions []*model.Possession
 	for rows.Next() {
 		var pos model.Possession
-		if err := rows.Scan(&pos.Id, &pos.UserId, &pos.CharaId, &pos.RegAt); err != nil {
+		if err := rows.Scan(&pos.ID, &pos.UserID, &pos.CharaID, &pos.RegAt); err != nil {
 			return nil, errors.WithStack(err)
 		}
 

@@ -132,7 +132,7 @@ func (u userHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type response struct {
-		Name string
+		Name string `json:"name"`
 	}
 
 	res := new(response)
@@ -164,7 +164,7 @@ func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, err := auth.Get(xToken, "user_id")
+	userID, err := auth.Get(xToken, "user_id")
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "your token don't have user_id", http.StatusBadRequest)
@@ -195,7 +195,7 @@ func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := u.userUseCase.Update(userId, name); err != nil {
+	if err := u.userUseCase.Update(userID, name); err != nil {
 		http.Error(w, "couldn't update user", http.StatusInternalServerError)
 		return
 	}
