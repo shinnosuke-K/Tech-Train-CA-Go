@@ -63,7 +63,7 @@ func (g gachaPersistence) Store(p *model.Possession) error {
 		return errors.WithStack(err)
 	}
 
-	_, err = tx.Query("insert into possessions(id, user_id, chara_id, reg_at) values (?,?,?,?)", p.Id, p.UserId, p.CharaId, p.RegAt)
+	_, err = tx.Exec("insert into possessions(id, user_id, chara_id, reg_at) values (?,?,?,?)", p.ID, p.UserID, p.CharaID, p.RegAt)
 	if err != nil {
 		return errors.WithStack(err)
 	}
