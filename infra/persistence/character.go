@@ -38,7 +38,7 @@ func (c characterPersistence) GetCharacter(id string) (*model.Character, error) 
 
 func (c characterPersistence) GetPossession(userId string) ([]*model.Possession, error) {
 
-	rows, err := c.DB.Query("select * from possessions where id = ?", userId)
+	rows, err := c.DB.Query("select * from possessions where user_id = ?", userId)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
