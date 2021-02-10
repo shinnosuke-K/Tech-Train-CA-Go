@@ -39,16 +39,16 @@ func (c characterUseCase) List(userId string) ([]*Character, error) {
 	// N+1問題
 	charaList := make([]*Character, 0)
 	for _, p := range possCharas {
-		c, err := c.characterUseCase.GetCharacter(p.CharaId)
+		chara, err := c.characterUseCase.GetCharacter(p.CharaID)
 		if err != nil {
 			log.Println(err)
-			return nil, fmt.Errorf("not exits monster id = %s", p.CharaId)
+			return nil, fmt.Errorf("not exits monster id = %s", p.CharaID)
 		}
 
 		charaList = append(charaList, &Character{
-			UserCharacterId: p.Id,
-			CharacterId:     c.Id,
-			Name:            c.Name,
+			UserCharacterId: p.ID,
+			CharacterId:     chara.ID,
+			Name:            chara.Name,
 		})
 	}
 	return charaList, nil

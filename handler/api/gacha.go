@@ -43,7 +43,7 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, err := auth.Get(xToken, "user_id")
+	userID, err := auth.Get(xToken, "user_id")
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "your token doesn't have user_id", http.StatusBadRequest)
@@ -82,7 +82,7 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := g.gachaUseCase.Store(userId, results); err != nil {
+	if err := g.gachaUseCase.Store(userID, results); err != nil {
 		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
