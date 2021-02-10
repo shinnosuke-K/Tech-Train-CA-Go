@@ -67,5 +67,10 @@ func (g gachaPersistence) Store(p *model.Possession) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
+
+	if err := tx.Commit(); err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
