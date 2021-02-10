@@ -48,7 +48,7 @@ func (g gachaPersistence) GetCharacter() ([]*model.Character, error) {
 	var characters []*model.Character
 	for rows.Next() {
 		var chara model.Character
-		if err := rows.Scan(&chara.CharaId, &chara.CharaName, &chara.Rarity, &chara.RegAt); err != nil {
+		if err := rows.Scan(&chara.Id, &chara.Name, &chara.RegAt, &chara.Rarity); err != nil {
 			return nil, errors.WithStack(err)
 		}
 		characters = append(characters, &chara)

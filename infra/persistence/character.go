@@ -28,7 +28,7 @@ func (c characterPersistence) GetCharacter(id string) (*model.Character, error) 
 
 	var chara model.Character
 	for rows.Next() {
-		if err := rows.Scan(&chara.Id, &chara.Name, &chara.Rarity, &chara.RegAt); err != nil {
+		if err := rows.Scan(&chara.Id, &chara.Name, &chara.RegAt, &chara.Rarity); err != nil {
 			return nil, errors.WithStack(err)
 		}
 	}
