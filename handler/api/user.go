@@ -59,10 +59,10 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := uuid.New().String()
+	userID := uuid.New().String()
 	for {
-		if u.userUseCase.IsRecord(userId) {
-			userId = uuid.New().String()
+		if u.userUseCase.IsRecord(userID) {
+			userID = uuid.New().String()
 		}
 		break
 	}
@@ -70,7 +70,7 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 	regTime := time.Now().Local()
 
 	token, err := auth.CreateJwtToken(map[string]interface{}{
-		"user_id": userId,
+		"user_id": userID,
 		"nbf":     regTime,
 		"iat":     regTime,
 	})
@@ -80,7 +80,7 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = u.userUseCase.Add(userId, name, regTime); err != nil {
+	if err = u.userUseCase.Add(userID, name, regTime); err != nil {
 		http.Error(w, "couldn't create account", http.StatusInternalServerError)
 		return
 	}
