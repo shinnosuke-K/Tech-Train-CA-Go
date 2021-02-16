@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/pkg/errors"
@@ -51,11 +50,18 @@ func (c characterUseCase) List(userId string) ([]*Character, error) {
 		return nil, errors.New("couldn't get characters")
 	}
 
-		charaList = append(charaList, &Character{
-			UserCharacterId: p.ID,
-			CharacterId:     chara.ID,
-			Name:            chara.Name,
-		})
+	charaList := make([]*Character, 0, len(possCharas))
+	for _, chara := range charaInfos {
+		for _, possChara := range possCharas {
+			if possChara.CharaID == chara.ID {
+				charaList = append(charaList, &Character{
+					UserCharacterID: possChara.ID,
+					CharacterID:     chara.ID,
+					Name:            chara.Name,
+				})
+			}
+		}
 	}
+
 	return charaList, nil
 }
