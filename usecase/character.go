@@ -9,8 +9,8 @@ import (
 )
 
 type Character struct {
-	UserCharacterId string `json:"userCharacterID"`
-	CharacterId     string `json:"characterID"`
+	UserCharacterID string `json:"userCharacterID"`
+	CharacterID     string `json:"characterID"`
 	Name            string `json:"name"`
 }
 
