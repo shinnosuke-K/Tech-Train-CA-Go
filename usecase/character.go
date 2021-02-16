@@ -36,14 +36,20 @@ func (c characterUseCase) List(userId string) ([]*Character, error) {
 		return nil, errors.New("you don't have any characters")
 	}
 
-	// N+1問題
-	charaList := make([]*Character, 0)
-	for _, p := range possCharas {
-		chara, err := c.characterUseCase.GetCharacter(p.CharaID)
-		if err != nil {
-			log.Println(err)
-			return nil, fmt.Errorf("not exits monster id = %s", p.CharaID)
-		}
+	if len(possCharas) < 1 {
+		return nil, errors.New("you don't have any characters")
+	}
+
+	charaIDs := make([]interface{}, 0, len(possCharas))
+	for _, possChara := range possCharas {
+		charaIDs = append(charaIDs, possChara.CharaID)
+	}
+
+	charaInfos, err := c.characterUseCase.GetCharacters(charaIDs)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("couldn't get characters")
+	}
 
 		charaList = append(charaList, &Character{
 			UserCharacterId: p.ID,
