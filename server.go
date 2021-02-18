@@ -23,35 +23,38 @@ func NewServer() *Server {
 	}
 }
 
-func initUserHandler(db *sql.DB) handler.UserHandler {
-	userPersistence := persistence.NewUserPersistence(db)
+func initUserHandler(DB *sql.DB) handler.UserHandler {
+	userPersistence := persistence.NewUserPersistence(DB)
 	userUseCase := usecase.NewUserUseCase(userPersistence)
 	return handler.NewUserHandler(userUseCase)
 }
 
-func initGachaHandler(db *sql.DB) handler.GachaHandler {
-	gachaPersistence := persistence.NewGachaPersistence(db)
-	gachaUseCase := usecase.NewGachaUseCase(gachaPersistence)
+func initGachaHandler(DB *sql.DB) handler.GachaHandler {
+	gachaPersistence := persistence.NewGachaPersistence(DB)
+
+	tx := db.NewTransaction(DB)
+
+	gachaUseCase := usecase.NewGachaUseCase(gachaPersistence, tx)
 	return handler.NewGachaHandler(gachaUseCase)
 }
 
-func initCharaHandler(db *sql.DB) handler.CharacterHandler {
-	charaPersistence := persistence.NewCharaPersistence(db)
+func initCharaHandler(DB *sql.DB) handler.CharacterHandler {
+	charaPersistence := persistence.NewCharaPersistence(DB)
 	charaUseCase := usecase.NewCharaUseCase(charaPersistence)
 	return handler.NewCharaHandler(charaUseCase)
 }
 
-func (router *Server) Init(db *sql.DB) {
+func (router *Server) Init(DB *sql.DB) {
 
-	userHandler := initUserHandler(db)
+	userHandler := initUserHandler(DB)
 	router.Engine.HandleFunc("/user/create", userHandler.Create)
 	router.Engine.HandleFunc("/user/get", userHandler.Get)
 	router.Engine.HandleFunc("/user/update", userHandler.Update)
 
-	gachaHandler := initGachaHandler(db)
+	gachaHandler := initGachaHandler(DB)
 	router.Engine.HandleFunc("/gacha/draw", gachaHandler.Draw)
 
-	charaHandler := initCharaHandler(db)
+	charaHandler := initCharaHandler(DB)
 	router.Engine.HandleFunc("/character/list", charaHandler.List)
 }
 
@@ -64,13 +67,13 @@ func (router *Server) Run(port string) {
 
 func main() {
 
-	db, err := db.Open()
+	DB, err := db.Open()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	server := NewServer()
-	server.Init(db)
+	server.Init(DB)
 
 	port := os.Getenv("PORT")
 	if port == "" {

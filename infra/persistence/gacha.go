@@ -56,19 +56,10 @@ func (g gachaPersistence) GetCharacter() ([]*model.Character, error) {
 	return characters, nil
 }
 
-func (g gachaPersistence) Store(p *model.Possession) error {
+func (g gachaPersistence) Store(tx *sql.Tx, p *model.Possession) error {
 
-	tx, err := g.DB.Begin()
+	_, err := tx.Exec("insert into possessions(id, user_id, chara_id, reg_at) values (?,?,?,?)", p.ID, p.UserID, p.CharaID, p.RegAt)
 	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	_, err = tx.Exec("insert into possessions(id, user_id, chara_id, reg_at) values (?,?,?,?)", p.ID, p.UserID, p.CharaID, p.RegAt)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	if err := tx.Commit(); err != nil {
 		return errors.WithStack(err)
 	}
 
