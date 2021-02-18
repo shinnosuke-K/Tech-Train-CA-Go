@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"time"
 
 	handler "github.com/shinnosuke-K/Tech-Train-CA-Go/handler/api"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
@@ -71,6 +73,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	rand.Seed(time.Now().UnixNano())
 
 	server := NewServer()
 	server.Init(DB)

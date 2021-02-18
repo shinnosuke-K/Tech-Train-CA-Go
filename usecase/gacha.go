@@ -54,8 +54,6 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 		countMap[c.Rarity] += 1
 	}
 
-	rand.Seed(time.Now().Unix())
-
 	r := make([]*Result, 0, times)
 	for n := 0; n < times; n++ {
 		p := rand.Float64() * 100
