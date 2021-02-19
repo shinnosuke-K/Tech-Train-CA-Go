@@ -30,18 +30,9 @@ func (u userPersistence) IsRecord(id string) bool {
 }
 
 func (u userPersistence) Add(tx *sql.Tx, user *model.User) error {
-	tx, err := u.DB.Begin()
-	if err != nil {
-		return errors.WithStack(err)
-	}
 
-	_, err = tx.Exec("insert into users(id, name, reg_at, update_at) values (?, ?, ?, ?)", user.ID, user.Name, user.RegAt, user.UpdateAt)
+	_, err := tx.Exec("insert into users(id, name, reg_at, update_at) values (?, ?, ?, ?)", user.ID, user.Name, user.RegAt, user.UpdateAt)
 	if err != nil {
-		tx.Rollback()
-		return errors.WithStack(err)
-	}
-
-	if err := tx.Commit(); err != nil {
 		return errors.WithStack(err)
 	}
 
