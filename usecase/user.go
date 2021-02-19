@@ -1,9 +1,14 @@
 package usecase
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/pkg/errors"
+
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
@@ -18,11 +23,13 @@ type UserUseCase interface {
 
 type userUseCase struct {
 	userRepository repository.UserRepository
+	transaction    db.Transaction
 }
 
-func NewUserUseCase(ur repository.UserRepository) UserUseCase {
+func NewUserUseCase(ur repository.UserRepository, tx db.Transaction) UserUseCase {
 	return &userUseCase{
 		userRepository: ur,
+		transaction:    tx,
 	}
 }
 
@@ -32,17 +39,25 @@ func (u userUseCase) IsRecord(id string) bool {
 
 func (u userUseCase) Add(id, name string, regTime time.Time) error {
 
-	user := model.User{
-		ID:       id,
-		Name:     name,
-		RegAt:    regTime,
-		UpdateAt: regTime,
+	err := u.transaction.DoInTx(func(tx *sql.Tx) error {
+		user := model.User{
+			ID:       id,
+			Name:     name,
+			RegAt:    regTime,
+			UpdateAt: regTime,
+		}
+
+		if err := u.userRepository.Add(tx, &user); err != nil {
+			log.Println(err)
+			return fmt.Errorf("couldn't create name=%s", name)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
-	if err := u.userRepository.Add(&user); err != nil {
-		log.Println(err)
-		return fmt.Errorf("couldn't create name=%s", name)
-	}
 	return nil
 }
 
@@ -59,15 +74,23 @@ func (u userUseCase) Get(id string) (*model.User, error) {
 
 func (u userUseCase) Update(id, name string) error {
 
-	user := model.User{
-		ID:       id,
-		Name:     name,
-		UpdateAt: time.Now().Local(),
+	err := u.transaction.DoInTx(func(tx *sql.Tx) error {
+		user := model.User{
+			ID:       id,
+			Name:     name,
+			UpdateAt: time.Now().Local(),
+		}
+
+		if err := u.userRepository.Update(tx, &user); err != nil {
+			log.Println(err)
+			return fmt.Errorf("couldn't update user id=%s, name=%s", id, name)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
-	if err := u.userRepository.Update(&user); err != nil {
-		log.Println(err)
-		return fmt.Errorf("couldn't update user id=%s, name=%s", id, name)
-	}
 	return nil
 }

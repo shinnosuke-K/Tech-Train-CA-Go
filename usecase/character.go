@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/pkg/errors"
@@ -9,8 +8,8 @@ import (
 )
 
 type Character struct {
-	UserCharacterId string `json:"userCharacterID"`
-	CharacterId     string `json:"characterID"`
+	UserCharacterID string `json:"userCharacterID"`
+	CharacterID     string `json:"characterID"`
 	Name            string `json:"name"`
 }
 
@@ -36,20 +35,33 @@ func (c characterUseCase) List(userId string) ([]*Character, error) {
 		return nil, errors.New("you don't have any characters")
 	}
 
-	// N+1問題
-	charaList := make([]*Character, 0)
-	for _, p := range possCharas {
-		chara, err := c.characterUseCase.GetCharacter(p.CharaID)
-		if err != nil {
-			log.Println(err)
-			return nil, fmt.Errorf("not exits monster id = %s", p.CharaID)
-		}
-
-		charaList = append(charaList, &Character{
-			UserCharacterId: p.ID,
-			CharacterId:     chara.ID,
-			Name:            chara.Name,
-		})
+	if len(possCharas) < 1 {
+		return nil, errors.New("you don't have any characters")
 	}
+
+	charaIDs := make([]interface{}, 0, len(possCharas))
+	for _, possChara := range possCharas {
+		charaIDs = append(charaIDs, possChara.CharaID)
+	}
+
+	charaInfos, err := c.characterUseCase.GetCharacters(charaIDs)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("couldn't get characters")
+	}
+
+	charaList := make([]*Character, 0, len(possCharas))
+	for _, chara := range charaInfos {
+		for _, possChara := range possCharas {
+			if possChara.CharaID == chara.ID {
+				charaList = append(charaList, &Character{
+					UserCharacterID: possChara.ID,
+					CharacterID:     chara.ID,
+					Name:            chara.Name,
+				})
+			}
+		}
+	}
+
 	return charaList, nil
 }

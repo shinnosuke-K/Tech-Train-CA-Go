@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -19,21 +20,30 @@ func NewCharaPersistence(db *sql.DB) repository.CharacterRepository {
 	}
 }
 
-func (c characterPersistence) GetCharacter(id string) (*model.Character, error) {
+func (c characterPersistence) GetCharacters(ids []interface{}) ([]*model.Character, error) {
 
-	rows, err := c.DB.Query("select * from characters where id = ?", id)
+	query := "select * from characters where id in (?" + strings.Repeat(",?", len(ids)-1) + ")"
+
+	stmt, err := c.DB.Prepare(query)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	var chara model.Character
+	rows, err := stmt.Query(ids...)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	var charas []*model.Character
 	for rows.Next() {
+		var chara model.Character
 		if err := rows.Scan(&chara.ID, &chara.Name, &chara.RegAt, &chara.Rarity); err != nil {
 			return nil, errors.WithStack(err)
 		}
+		charas = append(charas, &chara)
 	}
 
-	return &chara, nil
+	return charas, nil
 }
 
 func (c characterPersistence) GetPossession(userID string) ([]*model.Possession, error) {
