@@ -25,17 +25,14 @@ func NewServer() *Server {
 	}
 }
 
-func initUserHandler(DB *sql.DB) handler.UserHandler {
+func initUserHandler(DB *sql.DB, tx db.Transaction) handler.UserHandler {
 	userPersistence := persistence.NewUserPersistence(DB)
-	userUseCase := usecase.NewUserUseCase(userPersistence)
+	userUseCase := usecase.NewUserUseCase(userPersistence, tx)
 	return handler.NewUserHandler(userUseCase)
 }
 
-func initGachaHandler(DB *sql.DB) handler.GachaHandler {
+func initGachaHandler(DB *sql.DB, tx db.Transaction) handler.GachaHandler {
 	gachaPersistence := persistence.NewGachaPersistence(DB)
-
-	tx := db.NewTransaction(DB)
-
 	gachaUseCase := usecase.NewGachaUseCase(gachaPersistence, tx)
 	return handler.NewGachaHandler(gachaUseCase)
 }
@@ -48,12 +45,14 @@ func initCharaHandler(DB *sql.DB) handler.CharacterHandler {
 
 func (router *Server) Init(DB *sql.DB) {
 
-	userHandler := initUserHandler(DB)
+	tx := db.NewTransaction(DB)
+
+	userHandler := initUserHandler(DB, tx)
 	router.Engine.HandleFunc("/user/create", userHandler.Create)
 	router.Engine.HandleFunc("/user/get", userHandler.Get)
 	router.Engine.HandleFunc("/user/update", userHandler.Update)
 
-	gachaHandler := initGachaHandler(DB)
+	gachaHandler := initGachaHandler(DB, tx)
 	router.Engine.HandleFunc("/gacha/draw", gachaHandler.Draw)
 
 	charaHandler := initCharaHandler(DB)

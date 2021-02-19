@@ -29,7 +29,7 @@ func (u userPersistence) IsRecord(id string) bool {
 	return true
 }
 
-func (u userPersistence) Add(user *model.User) error {
+func (u userPersistence) Add(tx *sql.Tx, user *model.User) error {
 	tx, err := u.DB.Begin()
 	if err != nil {
 		return errors.WithStack(err)
@@ -64,19 +64,10 @@ func (u userPersistence) Get(id string) (*model.User, error) {
 	return &user, nil
 }
 
-func (u userPersistence) Update(user *model.User) error {
-	tx, err := u.DB.Begin()
-	if err != nil {
-		return errors.WithStack(err)
-	}
+func (u userPersistence) Update(tx *sql.Tx, user *model.User) error {
 
-	_, err = tx.Exec("update users set name=?, update_at=? where id=?", user.Name, user.UpdateAt, user.ID)
+	_, err := tx.Exec("update users set name=?, update_at=? where id=?", user.Name, user.UpdateAt, user.ID)
 	if err != nil {
-		tx.Rollback()
-		return errors.WithStack(err)
-	}
-
-	if err := tx.Commit(); err != nil {
 		return errors.WithStack(err)
 	}
 
