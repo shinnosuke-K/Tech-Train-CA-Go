@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -34,7 +33,7 @@ func CreateJwtToken(claims jwt.MapClaims) (string, error) {
 func rsaPublicKyeFunc() jwt.Keyfunc {
 	return func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("%s", "Unexpected signing method")
+			return nil, errors.New("Unexpected signing method")
 		}
 
 		keyData, err := ioutil.ReadFile(os.Getenv("KEY_PATH"))
@@ -124,7 +123,8 @@ func Get(accessToken string, key string) (string, error) {
 
 	value, ok := claims[key].(string)
 	if !ok {
-		return "", fmt.Errorf("not exist key= %s in claims", key)
+		return "", errors.Errorf("not exist key= %s in claims", key)
 	}
+
 	return value, nil
 }

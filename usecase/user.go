@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
@@ -49,7 +48,7 @@ func (u userUseCase) Add(id, name string, regTime time.Time) error {
 		}
 
 		if err := u.userRepository.Add(tx, &user); err != nil {
-			return fmt.Errorf("couldn't create name=%s", name)
+			return errors.Errorf("couldn't create name=%s", name)
 		}
 		return nil
 	})
@@ -66,7 +65,7 @@ func (u userUseCase) Get(id string) (*model.User, error) {
 
 	user, err := u.userRepository.Get(id)
 	if err != nil {
-		return nil, fmt.Errorf("not found id=%s", id)
+		return nil, errors.Errorf("not found id=%s", id)
 	}
 
 	return user, nil
@@ -82,7 +81,7 @@ func (u userUseCase) Update(id, name string) error {
 		}
 
 		if err := u.userRepository.Update(tx, &user); err != nil {
-			return fmt.Errorf("couldn't update user id=%s, name=%s", id, name)
+			return errors.Errorf("couldn't update user id=%s, name=%s", id, name)
 		}
 		return nil
 	})
