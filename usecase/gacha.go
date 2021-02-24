@@ -54,18 +54,23 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 		countMap[c.Rarity] += 1
 	}
 
+	var totalWeights int
+	for _, g := range gacha {
+		totalWeights += countMap[g.Rarity] * g.Weights
+	}
+
 	r := make([]*Result, 0, times)
 	for n := 0; n < times; n++ {
-		p := rand.Float64() * 100
-		total := 0.0
+		p := rand.Intn(totalWeights)
+		total := 0
 		for _, c := range chara {
 			for _, g := range gacha {
-				if g.Rarity == c.Rarity {
-					total += g.Probability / float64(countMap[c.Rarity])
+				if c.Rarity == g.Rarity {
+					total += g.Weights
 					break
 				}
 			}
-			if total >= p {
+			if p <= total {
 				r = append(r, &Result{
 					CharaId: c.ID,
 					Name:    c.Name,
