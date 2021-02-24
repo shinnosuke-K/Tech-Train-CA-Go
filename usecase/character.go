@@ -3,6 +3,8 @@ package usecase
 import (
 	"log"
 
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
+
 	"github.com/pkg/errors"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
 )
@@ -28,6 +30,8 @@ func NewCharaUseCase(cg repository.CharacterRepository) CharacterUseCase {
 }
 
 func (c characterUseCase) List(userId string) ([]*Character, error) {
+
+	logger.Log.Info("[method:List] start")
 
 	possCharas, err := c.characterUseCase.GetPossession(userId)
 	if err != nil {
@@ -63,5 +67,6 @@ func (c characterUseCase) List(userId string) ([]*Character, error) {
 		}
 	}
 
+	logger.Log.Info("[method:List] finished")
 	return charaList, nil
 }

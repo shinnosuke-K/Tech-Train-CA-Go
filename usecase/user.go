@@ -3,8 +3,9 @@ package usecase
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
+
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
 
 	"github.com/pkg/errors"
 
@@ -48,7 +49,6 @@ func (u userUseCase) Add(id, name string, regTime time.Time) error {
 		}
 
 		if err := u.userRepository.Add(tx, &user); err != nil {
-			log.Println(err)
 			return fmt.Errorf("couldn't create name=%s", name)
 		}
 		return nil
@@ -58,6 +58,7 @@ func (u userUseCase) Add(id, name string, regTime time.Time) error {
 		return errors.WithStack(err)
 	}
 
+	logger.Log.Info(" [method:Add] finished adding")
 	return nil
 }
 
@@ -65,7 +66,6 @@ func (u userUseCase) Get(id string) (*model.User, error) {
 
 	user, err := u.userRepository.Get(id)
 	if err != nil {
-		log.Println(err)
 		return nil, fmt.Errorf("not found id=%s", id)
 	}
 
@@ -82,7 +82,6 @@ func (u userUseCase) Update(id, name string) error {
 		}
 
 		if err := u.userRepository.Update(tx, &user); err != nil {
-			log.Println(err)
 			return fmt.Errorf("couldn't update user id=%s, name=%s", id, name)
 		}
 		return nil
@@ -92,5 +91,6 @@ func (u userUseCase) Update(id, name string) error {
 		return errors.WithStack(err)
 	}
 
+	logger.Log.Info(" [method:Update] finished updating")
 	return nil
 }

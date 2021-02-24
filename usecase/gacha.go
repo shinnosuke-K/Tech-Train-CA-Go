@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
+
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
@@ -38,6 +40,8 @@ func NewGachaUseCase(ug repository.GachaRepository, tx db.Transaction) GachaUseC
 }
 
 func (g gachaUseCase) Draw(times int) ([]*Result, error) {
+
+	logger.Log.Info("[method:Draw] start")
 
 	gacha, err := g.gachaRepository.GetRareRate()
 	if err != nil {
@@ -80,10 +84,13 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 		}
 	}
 
+	logger.Log.Info("[method:Draw] finished")
 	return r, nil
 }
 
 func (g gachaUseCase) Store(id string, results []*Result) error {
+
+	logger.Log.Info("[method:Store] start")
 
 	err := g.transaction.DoInTx(func(tx *sql.Tx) error {
 		for _, r := range results {
@@ -94,7 +101,7 @@ func (g gachaUseCase) Store(id string, results []*Result) error {
 				RegAt:   time.Now().Local(),
 			}
 			if err := g.gachaRepository.Store(tx, &posse); err != nil {
-				return errors.Wrap(err, "couldn't create")
+				return errors.Wrapf(err, "couldn't store character id=%s", r.CharaId)
 			}
 		}
 		return nil
@@ -104,5 +111,6 @@ func (g gachaUseCase) Store(id string, results []*Result) error {
 		return errors.WithStack(err)
 	}
 
+	logger.Log.Info("[method:Store] finished")
 	return nil
 }
