@@ -3,8 +3,9 @@ package api
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
+
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
@@ -38,21 +39,21 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := auth.Validate(xToken); err != nil {
-		log.Println(err)
+		logger.Log.Error(err.Error())
 		http.Error(w, "invalid token", http.StatusUnauthorized)
 		return
 	}
 
 	userID, err := auth.Get(xToken, "user_id")
 	if err != nil {
-		log.Println(err)
+		logger.Log.Error(err.Error())
 		http.Error(w, "your token doesn't have user_id", http.StatusBadRequest)
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
+		logger.Log.Error(err.Error())
 		http.Error(w, "body couldn't read", http.StatusBadRequest)
 		return
 	}
@@ -65,6 +66,7 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 
 	var jsonBody map[string]int
 	if err := json.Unmarshal(body, &jsonBody); err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, "body couldn't convert to json", http.StatusBadRequest)
 		return
 	}
@@ -77,13 +79,13 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 
 	results, err := g.gachaUseCase.Draw(times)
 	if err != nil {
-		log.Println(err)
+		logger.Log.Error(err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := g.gachaUseCase.Store(userID, results); err != nil {
-		log.Println(err)
+		logger.Log.Error(err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -96,7 +98,7 @@ func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 	res.Results = results
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(res); err != nil {
-		log.Println(err)
+		logger.Log.Error(err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}

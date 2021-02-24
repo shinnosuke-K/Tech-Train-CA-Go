@@ -2,10 +2,13 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
 
 	"github.com/google/uuid"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
@@ -37,6 +40,7 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, "body couldn't read", http.StatusBadRequest)
 		return
 	}
@@ -49,6 +53,7 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var jsonBody map[string]string
 	if err := json.Unmarshal(body, &jsonBody); err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, "body couldn't convert to json", http.StatusBadRequest)
 		return
 	}
@@ -62,6 +67,7 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID := uuid.New().String()
 	for {
 		if u.userUseCase.IsRecord(userID) {
+			logger.Log.Error(fmt.Sprintf("duplicate user_id : %s", userID))
 			userID = uuid.New().String()
 		}
 		break
@@ -76,11 +82,13 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, "couldn't create token", http.StatusInternalServerError)
 		return
 	}
 
 	if err = u.userUseCase.Add(userID, name, regTime); err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, "couldn't create account", http.StatusInternalServerError)
 		return
 	}
@@ -93,6 +101,7 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 	res.Token = token
 	w.Header().Set("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(res); err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -159,20 +168,21 @@ func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := auth.Validate(xToken); err != nil {
-		log.Println(err)
+		logger.Log.Error(err.Error())
 		http.Error(w, "invalid token", http.StatusUnauthorized)
 		return
 	}
 
 	userID, err := auth.Get(xToken, "user_id")
 	if err != nil {
-		log.Println(err)
+		logger.Log.Error(err.Error())
 		http.Error(w, "your token don't have user_id", http.StatusBadRequest)
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, "body couldn't read", http.StatusBadRequest)
 		return
 	}
@@ -185,6 +195,7 @@ func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	var jsonBody map[string]string
 	if err := json.Unmarshal(body, &jsonBody); err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, "body couldn't convert to json", http.StatusBadRequest)
 		return
 	}
@@ -196,6 +207,7 @@ func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := u.userUseCase.Update(userID, name); err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, "couldn't update user", http.StatusInternalServerError)
 		return
 	}
