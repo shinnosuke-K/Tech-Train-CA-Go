@@ -28,6 +28,7 @@ func (t *tx) DoInTx(txFunc func(*sql.Tx) error) error {
 			log.Println("recover")
 			tx.Rollback()
 		} else if err != nil {
+			log.Println(err)
 			tx.Rollback()
 		} else {
 			err = tx.Commit()

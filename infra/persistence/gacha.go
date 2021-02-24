@@ -29,7 +29,7 @@ func (g gachaPersistence) GetRareRate() ([]*model.Gacha, error) {
 	var gachaRate []*model.Gacha
 	for rows.Next() {
 		var gacha model.Gacha
-		if err := rows.Scan(&gacha.ID, &gacha.Rarity, &gacha.Probability); err != nil {
+		if err := rows.Scan(&gacha.ID, &gacha.Rarity, &gacha.Weights); err != nil {
 			return nil, errors.WithStack(err)
 		}
 		gachaRate = append(gachaRate, &gacha)
