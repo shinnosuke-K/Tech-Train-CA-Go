@@ -44,5 +44,20 @@ func (g gachaPersistence) Store(tx *sql.Tx, p *model.Possession) error {
 		return errors.WithStack(err)
 	}
 
+	_, err = tx.Exec("insert into possessions_composite_key(user_id, possession_id, chara_id, reg_at) values (?,?,?,?)", p.UserID, p.ID, p.CharaID, p.RegAt)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	_, err = tx.Exec("insert into possessions_index(id, user_id, chara_id, reg_at) values (?,?,?,?)", p.ID, p.UserID, p.CharaID, p.RegAt)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	_, err = tx.Exec("insert into possessions_not_index(id, user_id, chara_id, reg_at) values (?,?,?,?)", p.ID, p.UserID, p.CharaID, p.RegAt)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
