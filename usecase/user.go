@@ -57,7 +57,7 @@ func (u userUseCase) Add(id, name string, regTime time.Time) error {
 		return errors.WithStack(err)
 	}
 
-	logger.Log.Info(" [method:Add] finished adding")
+	logger.Log.Info("[method:Add] finished adding")
 	return nil
 }
 
