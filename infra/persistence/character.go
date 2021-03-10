@@ -37,7 +37,7 @@ func (c characterPersistence) GetCharacters(ids []interface{}) ([]*model.Charact
 	var charas []*model.Character
 	for rows.Next() {
 		var chara model.Character
-		if err := rows.Scan(&chara.ID, &chara.Name, &chara.RegAt, &chara.Rarity); err != nil {
+		if err := rows.Scan(&chara.ID, &chara.Name, &chara.RegAt, &chara.Rarity, &chara.Weight); err != nil {
 			return nil, errors.WithStack(err)
 		}
 		charas = append(charas, &chara)
