@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	handler "github.com/shinnosuke-K/Tech-Train-CA-Go/handler/api"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/persistence"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
@@ -72,6 +72,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	defer DB.Close()
 
 	rand.Seed(time.Now().UnixNano())
 

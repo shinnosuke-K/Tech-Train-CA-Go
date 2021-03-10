@@ -18,7 +18,6 @@ type logger struct {
 }
 
 func newLogger() Logger {
-
 	return &logger{
 		iLog: log.New(os.Stdout, "[INFO] ", log.Lmicroseconds),
 		eLog: log.New(os.Stdout, "[FATE] ", log.Lmicroseconds),
