@@ -19,25 +19,6 @@ func NewGachaPersistence(db *sql.DB) repository.GachaRepository {
 	}
 }
 
-func (g gachaPersistence) GetRareRate() ([]*model.Gacha, error) {
-
-	rows, err := g.DB.Query("select * from gachas")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	var gachaRate []*model.Gacha
-	for rows.Next() {
-		var gacha model.Gacha
-		if err := rows.Scan(&gacha.ID, &gacha.Rarity, &gacha.Weights); err != nil {
-			return nil, errors.WithStack(err)
-		}
-		gachaRate = append(gachaRate, &gacha)
-	}
-
-	return gachaRate, nil
-}
-
 func (g gachaPersistence) GetCharacter() ([]*model.Character, error) {
 
 	rows, err := g.DB.Query("select * from characters")
@@ -48,7 +29,7 @@ func (g gachaPersistence) GetCharacter() ([]*model.Character, error) {
 	var characters []*model.Character
 	for rows.Next() {
 		var chara model.Character
-		if err := rows.Scan(&chara.ID, &chara.Name, &chara.RegAt, &chara.Rarity); err != nil {
+		if err := rows.Scan(&chara.ID, &chara.Name, &chara.RegAt, &chara.Rarity, &chara.Weight); err != nil {
 			return nil, errors.WithStack(err)
 		}
 		characters = append(characters, &chara)

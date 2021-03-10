@@ -40,24 +40,14 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 
 	logger.Log.Info("[method:Draw] start")
 
-	gacha, err := g.gachaRepository.GetRareRate()
-	if err != nil {
-		return nil, errors.Wrap(err, "couldn't get the Gacha record")
-	}
-
 	chara, err := g.gachaRepository.GetCharacter()
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't get the Character record")
 	}
 
-	countMap := make(map[int]int, 0)
-	for _, c := range chara {
-		countMap[c.Rarity] += 1
-	}
-
 	var totalWeights int
-	for _, g := range gacha {
-		totalWeights += countMap[g.Rarity] * g.Weights
+	for _, c := range chara {
+		totalWeights += c.Weight
 	}
 
 	r := make([]*Result, 0, times)
@@ -65,12 +55,7 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 		p := rand.Intn(totalWeights)
 		total := 0
 		for _, c := range chara {
-			for _, g := range gacha {
-				if c.Rarity == g.Rarity {
-					total += g.Weights
-					break
-				}
-			}
+			total += c.Weight
 			if p <= total {
 				r = append(r, &Result{
 					CharaId: c.ID,
