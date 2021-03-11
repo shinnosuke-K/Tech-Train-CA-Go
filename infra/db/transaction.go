@@ -13,7 +13,7 @@ type tx struct {
 	db *sql.DB
 }
 
-func NewTransaction(db *sql.DB) Transaction {
+func NewTransaction(db *sql.DB) repository.Transaction {
 	return &tx{db: db}
 }
 
@@ -23,18 +23,17 @@ func (t *tx) DoInTx(txFunc func(*sql.Tx) error) error {
 		return errors.Wrap(err, "failed to begin transaction")
 	}
 
-	if err := txFunc(tx); err != nil {
-		if rollBackErr := tx.Rollback(); rollBackErr != nil {
-			return errors.Wrapf(err, "failed to rollback, error: %s", rollBackErr.Error())
+	defer func() {
+		if p := recover(); p != nil {
+			logger.Log.Error("recover")
+			tx.Rollback()
+		} else if err != nil {
+			logger.Log.Error("rollback")
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
 		}
-		return errors.Wrap(err, "failed to exec function (rollback was success)")
-	}
+	}()
 
-	if err := tx.Commit(); err != nil {
-		if rollBackErr := tx.Rollback(); rollBackErr != nil {
-			return errors.Wrapf(err, "failed to rollback, error: %s", rollBackErr.Error())
-		}
-		return errors.Wrap(err, "failed to commit (rollback was success)")
-	}
-	return nil
+	return txFunc(tx)
 }
