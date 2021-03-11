@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/response"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
 
@@ -26,47 +25,38 @@ func NewCharaHandler(cu usecase.CharacterUseCase) CharacterHandler {
 func (c characterHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "bad request method", http.StatusMethodNotAllowed)
+		response.Error(w, http.StatusMethodNotAllowed, nil, "bad request method")
 		return
 	}
 
 	xToken := r.Header.Get("x-token")
 	if xToken == "" {
-		http.Error(w, "x-token is empty", http.StatusUnauthorized)
+		response.Error(w, http.StatusUnauthorized, nil, "x-token is empty")
 		return
 	}
 
 	if err := auth.Validate(xToken); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "x-token is invalid", http.StatusUnauthorized)
+		response.Error(w, http.StatusUnauthorized, err, "x-token is invalid")
 		return
 	}
 
 	userID, err := auth.Get(xToken, "user_id")
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "your token don't have user_id", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, err, "your token don't have user_id")
 		return
 	}
 
 	list, err := c.characterUseCase.List(userID)
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err, err.Error())
 		return
 	}
 
-	type response struct {
+	type responseList struct {
 		Characters []*usecase.Character `json:"characters"`
 	}
 
-	res := new(response)
+	res := new(responseList)
 	res.Characters = list
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(res); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "couldn't convert to json", http.StatusInternalServerError)
-		return
-	}
-	return
+	response.WriteJSON(w, res)
 }

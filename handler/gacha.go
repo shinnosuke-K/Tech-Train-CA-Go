@@ -5,8 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
-
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/response"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
@@ -28,79 +27,67 @@ func NewGachaHandler(ug usecase.GachaUseCase) GachaHandler {
 func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "bad request method", http.StatusMethodNotAllowed)
+		response.Error(w, http.StatusMethodNotAllowed, nil, "bad request method")
 		return
 	}
 
 	xToken := r.Header.Get("x-token")
 	if xToken == "" {
-		http.Error(w, "x-token is empty", http.StatusUnauthorized)
+		response.Error(w, http.StatusUnauthorized, nil, "x-token is empty")
 		return
 	}
 
 	if err := auth.Validate(xToken); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "invalid token", http.StatusUnauthorized)
+		response.Error(w, http.StatusUnauthorized, err, "x-token is invalid")
 		return
 	}
 
 	userID, err := auth.Get(xToken, "user_id")
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "your token doesn't have user_id", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, err, "your token don't have user_id")
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "body couldn't read", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, err, "body couldn't read")
 		return
 	}
 	defer r.Body.Close()
 
 	if len(body) == 0 {
-		http.Error(w, "body is empty", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, nil, "body is empty")
 		return
 	}
 
 	var jsonBody map[string]int
 	if err := json.Unmarshal(body, &jsonBody); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "body couldn't convert to json", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, err, "body couldn't convert to json")
 		return
 	}
 
 	times, ok := jsonBody["times"]
 	if !ok || times == 0 {
-		http.Error(w, "times is empty or not exist", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, nil, "times is empty or not exist")
 		return
 	}
 
 	results, err := g.gachaUseCase.Draw(times)
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err, "internal server error")
 		return
 	}
 
 	if err := g.gachaUseCase.Store(userID, results); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err, "internal server error")
 		return
 	}
 
-	type response struct {
+	type responseList struct {
 		Results []*usecase.Result `json:"results"`
 	}
 
-	res := new(response)
+	res := new(responseList)
 	res.Results = results
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(res); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	return
+	response.WriteJSON(w, res)
 }

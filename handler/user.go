@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
-
 	"github.com/google/uuid"
+
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/response"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
 )
 
@@ -34,33 +34,31 @@ func NewUserHandler(uu usecase.UserUseCase) UserHandler {
 func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "bad request method", http.StatusMethodNotAllowed)
+		response.Error(w, http.StatusMethodNotAllowed, nil, "bad request method")
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "body couldn't read", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, err, "body couldn't read")
 		return
 	}
 	defer r.Body.Close()
 
 	if len(body) == 0 {
-		http.Error(w, "body is empty", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, nil, "body is empty")
 		return
 	}
 
 	var jsonBody map[string]string
 	if err := json.Unmarshal(body, &jsonBody); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "body couldn't convert to json", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, err, "body couldn't convert to json")
 		return
 	}
 
 	name := jsonBody["name"]
 	if name == "" {
-		http.Error(w, "name is empty", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, nil, "name is empty")
 		return
 	}
 
@@ -82,133 +80,113 @@ func (u userHandler) Create(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "couldn't create token", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, nil, "couldn't create token")
 		return
 	}
 
 	if err = u.userUseCase.Add(userID, name, regTime); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "couldn't create account", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err, "couldn't create account")
 		return
 	}
 
-	type response struct {
+	type resToken struct {
 		Token string `json:"token"`
 	}
 
-	res := new(response)
+	res := new(resToken)
 	res.Token = token
-	w.Header().Set("Content-Type", "application/json")
-	if err = json.NewEncoder(w).Encode(res); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	return
+	response.WriteJSON(w, res)
 }
 
 func (u userHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "bad request method", http.StatusMethodNotAllowed)
+		response.Error(w, http.StatusMethodNotAllowed, nil, "bad request method")
 		return
 	}
 
 	xToken := r.Header.Get("x-token")
 	if xToken == "" {
-		http.Error(w, "x-token is empty", http.StatusUnauthorized)
+		response.Error(w, http.StatusUnauthorized, nil, "x-token is empty")
 		return
 	}
 
 	if err := auth.Validate(xToken); err != nil {
-		log.Println(err)
-		http.Error(w, "invalid token", http.StatusUnauthorized)
-		return
-	}
-
-	userId, err := auth.Get(xToken, "user_id")
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "your token don't have user_id", http.StatusBadRequest)
-		return
-	}
-
-	account, err := u.userUseCase.Get(userId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	type response struct {
-		Name string `json:"name"`
-	}
-
-	res := new(response)
-	res.Name = account.Name
-	w.Header().Set("Content-Type", "application/json")
-	if err = json.NewEncoder(w).Encode(res); err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	return
-}
-
-func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != http.MethodPut {
-		http.Error(w, "bad request method", http.StatusMethodNotAllowed)
-		return
-	}
-
-	xToken := r.Header.Get("x-token")
-	if xToken == "" {
-		http.Error(w, "x-token is empty", http.StatusUnauthorized)
-		return
-	}
-
-	if err := auth.Validate(xToken); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "invalid token", http.StatusUnauthorized)
+		response.Error(w, http.StatusUnauthorized, err, "x-token is invalid")
 		return
 	}
 
 	userID, err := auth.Get(xToken, "user_id")
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "your token don't have user_id", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, err, "your token don't have user_id")
+		return
+	}
+
+	account, err := u.userUseCase.Get(userID)
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, err, err.Error())
+		return
+	}
+
+	type resUser struct {
+		Name string `json:"name"`
+	}
+
+	res := new(resUser)
+	res.Name = account.Name
+	response.WriteJSON(w, res)
+}
+
+func (u userHandler) Update(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPut {
+		response.Error(w, http.StatusMethodNotAllowed, nil, "bad request method")
+		return
+	}
+
+	xToken := r.Header.Get("x-token")
+	if xToken == "" {
+		response.Error(w, http.StatusUnauthorized, nil, "x-token is empty")
+		return
+	}
+
+	if err := auth.Validate(xToken); err != nil {
+		response.Error(w, http.StatusUnauthorized, err, "x-token is invalid")
+		return
+	}
+
+	userID, err := auth.Get(xToken, "user_id")
+	if err != nil {
+		response.Error(w, http.StatusBadRequest, err, "your token don't have user_id")
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "body couldn't read", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, err, "body couldn't read")
 		return
 	}
 	defer r.Body.Close()
 
 	if len(body) == 0 {
-		http.Error(w, "body is empty", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, nil, "body is empty")
 		return
 	}
 
 	var jsonBody map[string]string
 	if err := json.Unmarshal(body, &jsonBody); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "body couldn't convert to json", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, err, "body couldn't convert to json")
 		return
 	}
 
 	name := jsonBody["name"]
 	if name == "" {
-		http.Error(w, "name is empty", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, nil, "name is empty")
 		return
 	}
 
 	if err := u.userUseCase.Update(userID, name); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, "couldn't update user", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, err, "couldn't update user")
 		return
 	}
 
