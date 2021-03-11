@@ -10,7 +10,6 @@ import (
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
 )
 
@@ -26,10 +25,10 @@ type GachaUseCase interface {
 
 type gachaUseCase struct {
 	gachaRepository repository.GachaRepository
-	transaction     db.Transaction
+	transaction     repository.Transaction
 }
 
-func NewGachaUseCase(ug repository.GachaRepository, tx db.Transaction) GachaUseCase {
+func NewGachaUseCase(ug repository.GachaRepository, tx repository.Transaction) GachaUseCase {
 	return &gachaUseCase{
 		gachaRepository: ug,
 		transaction:     tx,

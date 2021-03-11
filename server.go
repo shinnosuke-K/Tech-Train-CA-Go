@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
+
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/middleware"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
@@ -26,13 +28,13 @@ func NewServer() *Server {
 	}
 }
 
-func initUserHandler(DB *sql.DB, tx db.Transaction) handler.UserHandler {
+func initUserHandler(DB *sql.DB, tx repository.Transaction) handler.UserHandler {
 	userPersistence := persistence.NewUserPersistence(DB)
 	userUseCase := usecase.NewUserUseCase(userPersistence, tx)
 	return handler.NewUserHandler(userUseCase)
 }
 
-func initGachaHandler(DB *sql.DB, tx db.Transaction) handler.GachaHandler {
+func initGachaHandler(DB *sql.DB, tx repository.Transaction) handler.GachaHandler {
 	gachaPersistence := persistence.NewGachaPersistence(DB)
 	gachaUseCase := usecase.NewGachaUseCase(gachaPersistence, tx)
 	return handler.NewGachaHandler(gachaUseCase)
