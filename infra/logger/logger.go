@@ -3,21 +3,18 @@ package logger
 import (
 	"log"
 	"os"
+
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
 )
 
 var Log = newLogger()
-
-type Logger interface {
-	Info(msg string)
-	Error(msg string)
-}
 
 type logger struct {
 	iLog *log.Logger
 	eLog *log.Logger
 }
 
-func newLogger() Logger {
+func newLogger() repository.Logger {
 	return &logger{
 		iLog: log.New(os.Stdout, "[INFO] ", log.Lmicroseconds),
 		eLog: log.New(os.Stdout, "[FATE] ", log.Lmicroseconds),
