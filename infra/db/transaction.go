@@ -4,11 +4,10 @@ import (
 	"database/sql"
 
 	"github.com/pkg/errors"
-)
 
-type Transaction interface {
-	DoInTx(func(*sql.Tx) error) error
-}
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
+)
 
 type tx struct {
 	db *sql.DB
