@@ -26,23 +26,7 @@ func NewGachaHandler(ug usecase.GachaUseCase) GachaHandler {
 
 func (g gachaHandler) Draw(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method != http.MethodPost {
-		response.Error(w, http.StatusMethodNotAllowed, nil, "bad request method")
-		return
-	}
-
-	xToken := r.Header.Get("x-token")
-	if xToken == "" {
-		response.Error(w, http.StatusUnauthorized, nil, "x-token is empty")
-		return
-	}
-
-	if err := auth.Validate(xToken); err != nil {
-		response.Error(w, http.StatusUnauthorized, err, "x-token is invalid")
-		return
-	}
-
-	userID, err := auth.Get(xToken, "user_id")
+	userID, err := auth.Get(r.Header, "user_id")
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, err, "your token don't have user_id")
 		return

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/middleware"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/persistence"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
@@ -48,15 +49,15 @@ func (router *Server) Init(DB *sql.DB) {
 	tx := db.NewTransaction(DB)
 
 	userHandler := initUserHandler(DB, tx)
-	router.Engine.HandleFunc("/user/create", userHandler.Create)
-	router.Engine.HandleFunc("/user/get", userHandler.Get)
-	router.Engine.HandleFunc("/user/update", userHandler.Update)
+	router.Engine.HandleFunc("/user/create", middleware.POST(http.HandlerFunc(userHandler.Create)))
+	router.Engine.HandleFunc("/user/get", middleware.GET(middleware.Auth(http.HandlerFunc(userHandler.Get))))
+	router.Engine.HandleFunc("/user/update", middleware.PUT(middleware.Auth(http.HandlerFunc(userHandler.Update))))
 
 	gachaHandler := initGachaHandler(DB, tx)
-	router.Engine.HandleFunc("/gacha/draw", gachaHandler.Draw)
+	router.Engine.HandleFunc("/gacha/draw", middleware.POST(middleware.Auth(http.HandlerFunc(gachaHandler.Draw))))
 
 	charaHandler := initCharaHandler(DB)
-	router.Engine.HandleFunc("/character/list", charaHandler.List)
+	router.Engine.HandleFunc("/character/list", middleware.GET(middleware.Auth(http.HandlerFunc(charaHandler.List))))
 }
 
 func (router *Server) Run(port string) {

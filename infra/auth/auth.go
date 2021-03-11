@@ -2,11 +2,11 @@ package auth
 
 import (
 	"io/ioutil"
+	"net/http"
 	"os"
 
-	"github.com/pkg/errors"
-
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
 )
 
 type Auth struct {
@@ -110,8 +110,8 @@ func validateIat(claims jwt.MapClaims) error {
 	return nil
 }
 
-func Get(accessToken string, key string) (string, error) {
-	token, err := jwt.Parse(accessToken, rsaPublicKyeFunc())
+func Get(header http.Header, key string) (string, error) {
+	token, err := jwt.Parse(header.Get("x-token"), rsaPublicKyeFunc())
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
