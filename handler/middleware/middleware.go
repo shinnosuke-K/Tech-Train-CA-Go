@@ -7,29 +7,9 @@ import (
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/auth"
 )
 
-func POST(next http.Handler) http.HandlerFunc {
+func ValidateMethod(method string, next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			response.Error(w, http.StatusMethodNotAllowed, nil, "bad request method")
-			return
-		}
-		next.ServeHTTP(w, r)
-	}
-}
-
-func GET(next http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			response.Error(w, http.StatusMethodNotAllowed, nil, "bad request method")
-			return
-		}
-		next.ServeHTTP(w, r)
-	}
-}
-
-func PUT(next http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
+		if r.Method != method {
 			response.Error(w, http.StatusMethodNotAllowed, nil, "bad request method")
 			return
 		}
