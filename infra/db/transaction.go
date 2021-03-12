@@ -17,7 +17,7 @@ func NewTransaction(db *sql.DB) repository.Transaction {
 	return &tx{db: db}
 }
 
-func (t *tx) DoInTx(txFunc func(*sql.Tx) error) error {
+func (t *tx) DoInTx(txFunc func(*sql.Tx) error) (err error) {
 	tx, err := t.db.Begin()
 	if err != nil {
 		return errors.Wrap(err, "failed to begin transaction")
@@ -31,7 +31,10 @@ func (t *tx) DoInTx(txFunc func(*sql.Tx) error) error {
 			logger.Log.Error("rollback")
 			tx.Rollback()
 		} else {
-			err = tx.Commit()
+			if commitErr := tx.Commit(); commitErr != nil {
+				tx.Rollback()
+				err = commitErr
+			}
 		}
 	}()
 
