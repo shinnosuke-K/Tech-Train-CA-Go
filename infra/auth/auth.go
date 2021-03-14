@@ -9,12 +9,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Auth struct {
-	Id  string
-	Nbf string
-	Iat string
-}
-
 func CreateJwtToken(claims jwt.MapClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
