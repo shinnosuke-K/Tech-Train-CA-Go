@@ -51,7 +51,7 @@ func (router *Server) Init(DB *sql.DB) {
 	tx := db.NewTransaction(DB)
 
 	userHandler := initUserHandler(DB, tx)
-	router.Engine.HandleFunc("/user/create", middleware.ValidateMethod(http.MethodPost, middleware.Auth(http.HandlerFunc(userHandler.Create))))
+	router.Engine.HandleFunc("/user/create", middleware.ValidateMethod(http.MethodPost, http.HandlerFunc(userHandler.Create)))
 	router.Engine.HandleFunc("/user/get", middleware.ValidateMethod(http.MethodGet, middleware.Auth(http.HandlerFunc(userHandler.Get))))
 	router.Engine.HandleFunc("/user/update", middleware.ValidateMethod(http.MethodPut, middleware.Auth(http.HandlerFunc(userHandler.Update))))
 
