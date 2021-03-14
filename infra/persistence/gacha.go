@@ -44,6 +44,7 @@ func (g gachaPersistence) Store(tx *sql.Tx, p *model.Possession) error {
 		return errors.WithStack(err)
 	}
 
+	// EXPLAIN を実行するために用意した実装（あとで消す）
 	_, err = tx.Exec("insert into possessions_composite_key(user_id, possession_id, chara_id, reg_at) values (?,?,?,?)", p.UserID, p.ID, p.CharaID, p.RegAt)
 	if err != nil {
 		return errors.WithStack(err)
