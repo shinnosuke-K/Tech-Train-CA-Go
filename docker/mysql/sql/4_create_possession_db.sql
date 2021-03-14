@@ -14,7 +14,6 @@ create table if not exists tech_train_ca_go.possessions_index (
     chara_id varchar(255) not null,
     reg_at datetime,
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES tech_train_ca_go.users(id),
     INDEX user_index(user_id)
 );
 
