@@ -5,16 +5,12 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
-
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
-
-	"github.com/google/uuid"
-
-	"github.com/pkg/errors"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
 )
 
 type Result struct {
@@ -29,10 +25,10 @@ type GachaUseCase interface {
 
 type gachaUseCase struct {
 	gachaRepository repository.GachaRepository
-	transaction     db.Transaction
+	transaction     repository.Transaction
 }
 
-func NewGachaUseCase(ug repository.GachaRepository, tx db.Transaction) GachaUseCase {
+func NewGachaUseCase(ug repository.GachaRepository, tx repository.Transaction) GachaUseCase {
 	return &gachaUseCase{
 		gachaRepository: ug,
 		transaction:     tx,
@@ -43,24 +39,14 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 
 	logger.Log.Info("[method:Draw] start")
 
-	gacha, err := g.gachaRepository.GetRareRate()
-	if err != nil {
-		return nil, errors.Wrap(err, "couldn't get the Gacha record")
-	}
-
 	chara, err := g.gachaRepository.GetCharacter()
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't get the Character record")
 	}
 
-	countMap := make(map[int]int, 0)
-	for _, c := range chara {
-		countMap[c.Rarity] += 1
-	}
-
 	var totalWeights int
-	for _, g := range gacha {
-		totalWeights += countMap[g.Rarity] * g.Weights
+	for _, c := range chara {
+		totalWeights += c.Weight
 	}
 
 	r := make([]*Result, 0, times)
@@ -68,12 +54,7 @@ func (g gachaUseCase) Draw(times int) ([]*Result, error) {
 		p := rand.Intn(totalWeights)
 		total := 0
 		for _, c := range chara {
-			for _, g := range gacha {
-				if c.Rarity == g.Rarity {
-					total += g.Weights
-					break
-				}
-			}
+			total += c.Weight
 			if p <= total {
 				r = append(r, &Result{
 					CharaId: c.ID,

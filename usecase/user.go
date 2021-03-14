@@ -8,8 +8,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
-
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
 )
@@ -23,10 +21,10 @@ type UserUseCase interface {
 
 type userUseCase struct {
 	userRepository repository.UserRepository
-	transaction    db.Transaction
+	transaction    repository.Transaction
 }
 
-func NewUserUseCase(ur repository.UserRepository, tx db.Transaction) UserUseCase {
+func NewUserUseCase(ur repository.UserRepository, tx repository.Transaction) UserUseCase {
 	return &userUseCase{
 		userRepository: ur,
 		transaction:    tx,
@@ -57,7 +55,7 @@ func (u userUseCase) Add(id, name string, regTime time.Time) error {
 		return errors.WithStack(err)
 	}
 
-	logger.Log.Info(" [method:Add] finished adding")
+	logger.Log.Info("[method:Add] finished adding")
 	return nil
 }
 

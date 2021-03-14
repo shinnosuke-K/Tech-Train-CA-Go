@@ -9,7 +9,10 @@ import (
 	"os"
 	"time"
 
-	handler "github.com/shinnosuke-K/Tech-Train-CA-Go/handler/api"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
+
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/middleware"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/persistence"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/usecase"
@@ -25,13 +28,13 @@ func NewServer() *Server {
 	}
 }
 
-func initUserHandler(DB *sql.DB, tx db.Transaction) handler.UserHandler {
+func initUserHandler(DB *sql.DB, tx repository.Transaction) handler.UserHandler {
 	userPersistence := persistence.NewUserPersistence(DB)
 	userUseCase := usecase.NewUserUseCase(userPersistence, tx)
 	return handler.NewUserHandler(userUseCase)
 }
 
-func initGachaHandler(DB *sql.DB, tx db.Transaction) handler.GachaHandler {
+func initGachaHandler(DB *sql.DB, tx repository.Transaction) handler.GachaHandler {
 	gachaPersistence := persistence.NewGachaPersistence(DB)
 	gachaUseCase := usecase.NewGachaUseCase(gachaPersistence, tx)
 	return handler.NewGachaHandler(gachaUseCase)
@@ -48,15 +51,15 @@ func (router *Server) Init(DB *sql.DB) {
 	tx := db.NewTransaction(DB)
 
 	userHandler := initUserHandler(DB, tx)
-	router.Engine.HandleFunc("/user/create", userHandler.Create)
-	router.Engine.HandleFunc("/user/get", userHandler.Get)
-	router.Engine.HandleFunc("/user/update", userHandler.Update)
+	router.Engine.HandleFunc("/user/create", middleware.ValidateMethod(http.MethodPost, http.HandlerFunc(userHandler.Create)))
+	router.Engine.HandleFunc("/user/get", middleware.ValidateMethod(http.MethodGet, middleware.Auth(http.HandlerFunc(userHandler.Get))))
+	router.Engine.HandleFunc("/user/update", middleware.ValidateMethod(http.MethodPut, middleware.Auth(http.HandlerFunc(userHandler.Update))))
 
 	gachaHandler := initGachaHandler(DB, tx)
-	router.Engine.HandleFunc("/gacha/draw", gachaHandler.Draw)
+	router.Engine.HandleFunc("/gacha/draw", middleware.ValidateMethod(http.MethodPost, middleware.Auth(http.HandlerFunc(gachaHandler.Draw))))
 
 	charaHandler := initCharaHandler(DB)
-	router.Engine.HandleFunc("/character/list", charaHandler.List)
+	router.Engine.HandleFunc("/character/list", middleware.ValidateMethod(http.MethodGet, middleware.Auth(http.HandlerFunc(charaHandler.List))))
 }
 
 func (router *Server) Run(port string) {
@@ -72,6 +75,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	defer DB.Close()
 
 	rand.Seed(time.Now().UnixNano())
 

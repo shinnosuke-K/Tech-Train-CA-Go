@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/pkg/errors"
 
@@ -21,11 +20,13 @@ func NewUserPersistence(db *sql.DB) repository.UserRepository {
 }
 
 func (u userPersistence) IsRecord(id string) bool {
-	_, err := u.DB.Query("select * from users where id = ?", id)
-	if err != nil {
-		log.Println(err)
+	row := u.DB.QueryRow("select * from users where id = ?", id)
+
+	var user model.User
+	if err := row.Scan(&user.ID); errors.Is(err, sql.ErrNoRows) {
 		return false
 	}
+
 	return true
 }
 
