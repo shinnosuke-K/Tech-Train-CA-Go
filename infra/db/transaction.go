@@ -27,6 +27,7 @@ func (t *tx) DoInTx(txFunc func(*sql.Tx) error) (err error) {
 		if p := recover(); p != nil {
 			logger.Log.Error("recover")
 			tx.Rollback()
+			panic(p)
 		} else if err != nil {
 			logger.Log.Error("rollback")
 			tx.Rollback()
