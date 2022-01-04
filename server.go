@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
-
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/handler/middleware"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/db"

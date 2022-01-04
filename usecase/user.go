@@ -4,12 +4,10 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
-
 	"github.com/pkg/errors"
-
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/model"
 	"github.com/shinnosuke-K/Tech-Train-CA-Go/domain/repository"
+	"github.com/shinnosuke-K/Tech-Train-CA-Go/infra/logger"
 )
 
 type UserUseCase interface {
